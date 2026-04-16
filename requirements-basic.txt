@@ -1,0 +1,8 @@
+jupyterlab
+numpy
+pandas
+scikit-learn
+matplotlib
+openml
+xgboost
+lightgbm
