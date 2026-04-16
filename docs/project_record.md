@@ -17,15 +17,17 @@ Tabular Foundation Models
 | 阶段 | 目标 | 状态 | 完成时间 | 主要产出 |
 | --- | --- | --- | --- | --- |
 | Phase 1 | 明确问题、学习基础概念、搭环境、完成教学实验 | 已完成 | 2026-04-16 | 中文概念 notebook、本地环境、GitHub 仓库 |
-| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 下一步 | - | 待补充 |
-| Phase 3 | 对多个数据集和模型做系统对比 | 未开始 | - | 待补充 |
+| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 已完成 | 2026-04-16 | Adult baseline notebook、first_result.csv |
+| Phase 3 | 对多个数据集和模型做系统对比 | 下一步 | - | 待补充 |
 | Phase 4 | 分析结果、出图、写英文报告和演示 | 未开始 | - | 待补充 |
 
 ## 当前进度
 
 - 已完成第一阶段
+- 已完成第二阶段
 - 已初始化本地 Git 仓库并创建公开 GitHub 仓库
 - 已完成第一份中文教学 notebook
+- 已完成第一个真实数据集实验：`Adult + LightGBM baseline`
 - 已准备好后续实验的基础目录结构
 - 已导入并修订初步阶段计划
 - 已建立项目记忆卡和协作记录体系
@@ -65,6 +67,52 @@ Tabular Foundation Models
 - 选择第一个真实项目数据集
 - 看懂数据规模、特征列和目标列
 - 先用一个 baseline 模型跑通完整流程
+
+## Phase 2 完成记录
+
+### 时间
+
+2026-04-16
+
+### 本阶段目标
+
+- 选择第一个真实数据集
+- 完成数据读取
+- 检查目标列、特征类型和缺失值
+- 完成一次最基础预处理
+- 跑通一个 baseline 模型
+- 记录 `accuracy` 和运行时间
+
+### 本阶段完成内容
+
+- 选定第一个正式数据集：`Adult`
+- 确认该数据集共有 48842 条样本、14 个原始特征
+- 检查出 `workclass`、`occupation`、`native-country` 存在缺失值
+- 确认存在 8 个类别特征和 6 个数值特征
+- 使用 `LightGBM + ColumnTransformer + SimpleImputer + OneHotEncoder` 跑通第一个 baseline
+- 生成 `notebooks/phase2_adult_baseline.ipynb`
+- 保存第一次正式结果到 `results/first_result.csv`
+- 同步更新项目记录体系
+
+### 本阶段结果
+
+- 数据集：`Adult`
+- 模型：`LightGBM`
+- 指标：`accuracy = 0.8751`
+- 训练耗时：`0.5361` 秒
+
+### 本阶段学到的关键点
+
+- 真实数据集和教学数据集最大的差别，在于必须先做数据体检
+- 类别特征和缺失值会直接决定预处理方案
+- baseline 的意义不是“简单”，而是提供后续比较的参照物
+- 一旦第一条正式实验链路跑通，后面接入新模型会快很多
+
+### 下一阶段计划
+
+- 接入 `TabPFN v2`
+- 在相同 Adult 测试集上与 LightGBM 做第一次正式对比
+- 记录模型表现、运行时间和使用难度
 
 ## 协作记忆入口
 

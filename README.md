@@ -4,12 +4,13 @@
 
 ## 当前阶段
 
-目前已完成第一阶段内容：
+目前已完成前两个阶段的核心内容：
 
 - 明确项目问题
 - 学习 6 个基础概念
 - 搭建本地实验环境
 - 完成第一份教学 notebook
+- 在 Adult 数据集上跑通第一个 baseline
 
 当前项目问题：
 
@@ -31,11 +32,13 @@
 ## 当前仓库内容
 
 - `notebooks/phase1_concepts_demo.ipynb`：第一阶段中文教学 notebook
+- `notebooks/phase2_adult_baseline.ipynb`：第二阶段 Adult 数据集 baseline notebook
 - `docs/session_handoff.md`：新开对话时优先读取的项目记忆卡
 - `docs/phase_plan.md`：修订后的阶段计划与里程碑路线图
 - `docs/project_record.md`：项目整体进度与里程碑记录
 - `docs/work_log.md`：按时间记录每天/每次推进内容
 - `docs/experiment_log.md`：按实验记录数据集、模型、结果与观察
+- `results/first_result.csv`：第一个正式 baseline 结果
 - `src/`：后续实验代码
 - `data/`：数据目录
 - `results/`：实验结果
@@ -54,7 +57,7 @@ pip install -r requirements-basic.txt
 
 ## 下一步
 
-下一阶段将开始加载真实表格分类数据集，并先跑通一个 baseline 模型。
+下一阶段将接入 `TabPFN v2`，并在同一个 Adult 测试集上与 LightGBM baseline 做第一次正式对比。
 
 ## 如何记录项目过程
 

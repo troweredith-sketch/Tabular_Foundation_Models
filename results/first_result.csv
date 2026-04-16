@@ -1,0 +1,2 @@
+dataset,model,metric,accuracy,fit_seconds,n_samples,train_size,test_size,n_features_raw,n_features_after_encoding,n_numeric_features,n_categorical_features
+adult,LightGBM,accuracy,0.8751,0.5361,48842,39073,9769,14,105,6,8

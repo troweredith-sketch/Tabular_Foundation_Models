@@ -8,6 +8,3 @@ data/raw/*
 
 data/processed/*
 !data/processed/.gitkeep
-
-results/*
-!results/.gitkeep
