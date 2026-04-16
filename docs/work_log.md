@@ -35,6 +35,9 @@
 - 安装 `jupyterlab`、`numpy`、`pandas`、`scikit-learn`、`openml`、`xgboost`、`lightgbm`
 - 创建中文 notebook：`notebooks/phase1_concepts_demo.ipynb`
 - 初始化 Git 仓库并推送到 GitHub
+- 建立项目记录体系：`project_record.md`、`work_log.md`、`experiment_log.md`
+- 读取并修订外部的初步阶段计划
+- 新增项目记忆卡 `session_handoff.md`
 
 ### 遇到的问题
 
@@ -53,12 +56,14 @@
 - 训练集和测试集必须区分，不然很难判断泛化能力
 - 训练集准确率非常高时，需要警惕过拟合
 - 环境搭建过程本身也是项目推进的一部分，值得记录
+- 如果把关键信息沉淀到仓库文件里，就不用依赖超长对话记忆
 
 ### 下一步
 
 - 进入第二阶段
 - 加载第一个真实表格分类数据集
 - 跑通一个 baseline 模型
+- 每次推进后同步更新记忆卡和日志
 
 ---
 

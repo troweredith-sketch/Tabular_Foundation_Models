@@ -31,6 +31,8 @@
 ## 当前仓库内容
 
 - `notebooks/phase1_concepts_demo.ipynb`：第一阶段中文教学 notebook
+- `docs/session_handoff.md`：新开对话时优先读取的项目记忆卡
+- `docs/phase_plan.md`：修订后的阶段计划与里程碑路线图
 - `docs/project_record.md`：项目整体进度与里程碑记录
 - `docs/work_log.md`：按时间记录每天/每次推进内容
 - `docs/experiment_log.md`：按实验记录数据集、模型、结果与观察
@@ -64,3 +66,16 @@ pip install -r requirements-basic.txt
    用来记录每次学习、调试、阅读、写代码、搭环境时做了什么。
 3. `docs/experiment_log.md`
    用来记录每次实验的设置、结果和观察，后面写报告时会非常有用。
+
+## 如何保证后续对话不丢上下文
+
+建议每次和 AI 新开对话时，都先让它阅读下面 3 份文件：
+
+1. `docs/session_handoff.md`
+   这是最短的项目记忆卡，适合快速续接。
+2. `docs/phase_plan.md`
+   这是修订后的阶段路线图，适合确认当前应该做哪一步。
+3. `docs/project_record.md`
+   这是完整进度记录，适合补全背景和里程碑。
+
+如果只想最快续接，优先读 `docs/session_handoff.md`。

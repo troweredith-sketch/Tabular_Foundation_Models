@@ -17,7 +17,7 @@ Tabular Foundation Models
 | 阶段 | 目标 | 状态 | 完成时间 | 主要产出 |
 | --- | --- | --- | --- | --- |
 | Phase 1 | 明确问题、学习基础概念、搭环境、完成教学实验 | 已完成 | 2026-04-16 | 中文概念 notebook、本地环境、GitHub 仓库 |
-| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 进行中 | - | 待补充 |
+| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 下一步 | - | 待补充 |
 | Phase 3 | 对多个数据集和模型做系统对比 | 未开始 | - | 待补充 |
 | Phase 4 | 分析结果、出图、写英文报告和演示 | 未开始 | - | 待补充 |
 
@@ -27,6 +27,8 @@ Tabular Foundation Models
 - 已初始化本地 Git 仓库并创建公开 GitHub 仓库
 - 已完成第一份中文教学 notebook
 - 已准备好后续实验的基础目录结构
+- 已导入并修订初步阶段计划
+- 已建立项目记忆卡和协作记录体系
 
 ## Phase 1 完成记录
 
@@ -63,6 +65,16 @@ Tabular Foundation Models
 - 选择第一个真实项目数据集
 - 看懂数据规模、特征列和目标列
 - 先用一个 baseline 模型跑通完整流程
+
+## 协作记忆入口
+
+为了避免对话过长后上下文丢失，后续协作默认优先参考以下文件：
+
+1. `docs/session_handoff.md`
+2. `docs/phase_plan.md`
+3. `docs/project_record.md`
+4. `docs/work_log.md`
+5. `docs/experiment_log.md`
 
 ## 展示时可以强调的亮点
 
