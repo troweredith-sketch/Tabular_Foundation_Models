@@ -31,6 +31,9 @@
 ## 当前仓库内容
 
 - `notebooks/phase1_concepts_demo.ipynb`：第一阶段中文教学 notebook
+- `docs/project_record.md`：项目整体进度与里程碑记录
+- `docs/work_log.md`：按时间记录每天/每次推进内容
+- `docs/experiment_log.md`：按实验记录数据集、模型、结果与观察
 - `src/`：后续实验代码
 - `data/`：数据目录
 - `results/`：实验结果
@@ -50,3 +53,14 @@ pip install -r requirements-basic.txt
 ## 下一步
 
 下一阶段将开始加载真实表格分类数据集，并先跑通一个 baseline 模型。
+
+## 如何记录项目过程
+
+为了方便后续回顾、展示和写报告，建议每次推进都同步更新下面 3 份文件：
+
+1. `docs/project_record.md`
+   用来维护项目整体阶段、当前状态和关键里程碑。
+2. `docs/work_log.md`
+   用来记录每次学习、调试、阅读、写代码、搭环境时做了什么。
+3. `docs/experiment_log.md`
+   用来记录每次实验的设置、结果和观察，后面写报告时会非常有用。
