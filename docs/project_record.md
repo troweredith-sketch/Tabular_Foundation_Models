@@ -17,14 +17,15 @@ Tabular Foundation Models
 | 阶段 | 目标 | 状态 | 完成时间 | 主要产出 |
 | --- | --- | --- | --- | --- |
 | Phase 1 | 明确问题、学习基础概念、搭环境、完成教学实验 | 已完成 | 2026-04-16 | 中文概念 notebook、本地环境、GitHub 仓库 |
-| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 已完成 | 2026-04-16 | Adult baseline notebook、first_result.csv |
-| Phase 3 | 对多个数据集和模型做系统对比 | 下一步 | - | 待补充 |
+| Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 已完成 | 2026-04-22 | Adult baseline notebook、first_result.csv |
+| Phase 3 | 对多个数据集和模型做系统对比 | 进行中 | 2026-04-22 | 待补充 |
 | Phase 4 | 分析结果、出图、写英文报告和演示 | 未开始 | - | 待补充 |
 
 ## 当前进度
 
 - 已完成第一阶段
 - 已完成第二阶段
+- 已在 2026-04-22 正式确认第二阶段收尾，开始进入第三阶段
 - 已初始化本地 Git 仓库并创建公开 GitHub 仓库
 - 已完成第一份中文教学 notebook
 - 已完成第一个真实数据集实验：`Adult + LightGBM baseline`
@@ -72,7 +73,7 @@ Tabular Foundation Models
 
 ### 时间
 
-2026-04-16
+2026-04-22（实验首次跑通于 2026-04-16，已在 2026-04-22 正式确认收尾）
 
 ### 本阶段目标
 
@@ -93,6 +94,7 @@ Tabular Foundation Models
 - 生成 `notebooks/phase2_adult_baseline.ipynb`
 - 保存第一次正式结果到 `results/first_result.csv`
 - 同步更新项目记录体系
+- 在 2026-04-22 正式确认第二阶段完成，并将项目状态切换到第三阶段
 
 ### 本阶段结果
 
