@@ -6,3 +6,4 @@ matplotlib
 openml
 xgboost
 lightgbm
+tabpfn
