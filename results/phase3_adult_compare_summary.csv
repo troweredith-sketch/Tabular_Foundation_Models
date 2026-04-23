@@ -1,0 +1,5 @@
+scenario,model,n_runs,seeds,train_size_min,train_size_max,accuracy_mean,accuracy_std,accuracy_min,accuracy_max,fit_seconds_median,predict_seconds_median,total_seconds_median
+adult_control_10k,LightGBM,5,"42,43,44,45,46",10000,10000,0.8692,0.0014,0.8677,0.8712,0.3842,0.1217,0.5246
+adult_control_10k,TabPFN v2,5,"42,43,44,45,46",10000,10000,0.8614,0.0031,0.8561,0.8641,0.4061,22.3014,22.692
+full_adult_limit_override,LightGBM,5,"42,43,44,45,46",39073,39073,0.8752,0.0025,0.8721,0.8781,0.9925,0.0914,1.0839
+full_adult_limit_override,TabPFN v2,5,"42,43,44,45,46",39073,39073,0.8633,0.0023,0.8597,0.8654,1.6503,171.7491,173.5263
