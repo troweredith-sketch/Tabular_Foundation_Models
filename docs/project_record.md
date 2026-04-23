@@ -24,7 +24,7 @@ Tabular Foundation Models
 | Phase 1 | 明确问题、学习基础概念、搭环境、完成教学实验 | 已完成 | 2026-04-16 | 中文概念 notebook、本地环境、GitHub 仓库 |
 | Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 已完成 | 2026-04-22 | Adult baseline notebook、first_result.csv |
 | Phase 3 | 主线口径修正与公平性加固 | 已完成 | 2026-04-23 | 统一结果字段、full Adult 受限结果、10k 控制实验、多 seed summary、Phase 3 学习 md |
-| Phase 4 | 主线模型与数据集补齐 | 未开始 | - | 待补充 |
+| Phase 4 | 主线模型与数据集补齐 | 已完成 | 2026-04-23 | 四模型双数据集统一脚本、Phase 4 总结果表、Phase 4 学习 md |
 | Phase 5 | Big Plus 方法定义与主数据集深挖 | 未开始 | - | 待补充 |
 | Phase 6 | Big Plus 次验证与稳健性判断 | 未开始 | - | 待补充 |
 | Phase 7 | 结果整合、英文报告与演示转写 | 未开始 | - | 待补充 |
@@ -34,6 +34,7 @@ Tabular Foundation Models
 - 已完成第一阶段
 - 已完成第二阶段
 - 已完成 Phase 3
+- 已完成 Phase 4
 - 已完成第一次正式模型对比：`Adult + LightGBM vs TabPFN v2`
 - 已补做 `Adult 10k control` 控制实验
 - 已将 `src/phase3_adult_compare.py` 升级为默认 `all` 的多 seed 脚本
@@ -48,6 +49,26 @@ Tabular Foundation Models
 - 已锁定 Big Plus 主方向为：基于 `TabICL` 的检索式支持集选择改进
 - 已新增 Big Plus 正式规划文档：`docs/big_plus_plan.md`
 - 已完成当前阶段学习型文档：`notebooks/phase3_fairness_reset.md`
+- 已在项目本地 `.venv` 中正式接入 `tabicl==2.1.0`
+- 已新增 Phase 4 统一主线脚本：`src/phase4_mainline_compare.py`
+- 已生成两份 Phase 4 主线结果文件：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+- 已将主线正式扩展为：
+  - 模型：`TabPFN v2`、`TabICL`、`LightGBM`、`XGBoost`
+  - 数据集：`Adult`、`Bank Marketing`
+- 已确认在 `Adult control_10k` 的 `5` 个 seeds 结果中：
+  - `XGBoost accuracy_mean = 0.8698 ± 0.0022`
+  - `LightGBM accuracy_mean = 0.8692 ± 0.0014`
+  - `TabICL accuracy_mean = 0.8681 ± 0.0026`
+  - `TabPFN v2 accuracy_mean = 0.8614 ± 0.0031`
+- 已确认在 `Bank Marketing control_10k` 的 `5` 个 seeds 结果中：
+  - `TabICL accuracy_mean = 0.9093 ± 0.0021`
+  - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`
+  - `LightGBM accuracy_mean = 0.9044 ± 0.0014`
+  - `XGBoost accuracy_mean = 0.9040 ± 0.0016`
+- 已确认 `TabICL` 在 `Bank Marketing` 上达到与 `TabPFN v2` 相近或略优的准确率，但预测时间明显更短
+- 已完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
 - 已把“每推进一个阶段就写一篇 notebooks 中文 md”升级为硬性规则
 
 ## Phase 1 完成记录
@@ -228,6 +249,109 @@ Tabular Foundation Models
 - 在 `Adult` 上接入 `TabICL`
 - 在统一结果表中补入 `XGBoost`
 - 扩展到 `Bank Marketing`
+
+## Phase 4 完成记录
+
+### 时间
+
+2026-04-23
+
+### 本阶段目标
+
+- 在 `Adult` 上正式接入 `TabICL`
+- 将 `XGBoost` 纳入统一主线比较
+- 将主线扩展到 `Bank Marketing`
+- 在统一字段和统一记录方式下完成四模型双数据集主线比较
+
+### 本阶段完成内容
+
+- 在项目本地 `.venv` 中安装并验证 `tabicl==2.1.0`
+- 阅读 `TabICLClassifier` 本地源码，确认其 sklearn 接口、checkpoint 和内部预处理方式
+- 将 `tabicl` 补入 `requirements-basic.txt`
+- 新增统一主线脚本：`src/phase4_mainline_compare.py`
+- 将主线比较升级为：
+  - 数据集：`Adult`、`Bank Marketing`
+  - 模型：`LightGBM`、`XGBoost`、`TabPFN v2`、`TabICL`
+  - 场景：`control_10k`、`full_train_reference`
+  - seeds：`42, 43, 44, 45, 46`
+- 新增 `Bank Marketing` 本地缓存：`data/raw/bank_marketing_openml.csv`
+- 生成主线结果文件：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+- 更新 `docs/experiment_log.md`
+- 更新 `docs/project_record.md`
+- 更新 `docs/work_log.md`
+- 更新 `docs/session_handoff.md`
+- 更新 `docs/phase_plan.md`
+- 更新 `README.md`
+- 完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
+
+### 本阶段结果
+
+#### 1. `Adult`
+
+- `control_10k`
+  - `XGBoost accuracy_mean = 0.8698 ± 0.0022`
+  - `LightGBM accuracy_mean = 0.8692 ± 0.0014`
+  - `TabICL accuracy_mean = 0.8681 ± 0.0026`
+  - `TabPFN v2 accuracy_mean = 0.8614 ± 0.0031`
+- `full_train_reference`
+  - `LightGBM accuracy_mean = 0.8752 ± 0.0025`
+  - `XGBoost accuracy_mean = 0.8743 ± 0.0033`
+  - `TabICL accuracy_mean = 0.8707 ± 0.0021`
+  - `TabPFN v2 accuracy_mean = 0.8633 ± 0.0023`
+
+#### 2. `Bank Marketing`
+
+- `control_10k`
+  - `TabICL accuracy_mean = 0.9093 ± 0.0021`
+  - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`
+  - `LightGBM accuracy_mean = 0.9044 ± 0.0014`
+  - `XGBoost accuracy_mean = 0.9040 ± 0.0016`
+- `full_train_reference`
+  - `TabICL accuracy_mean = 0.9119 ± 0.0019`
+  - `TabPFN v2 accuracy_mean = 0.9110 ± 0.0019`
+  - `LightGBM accuracy_mean = 0.9083 ± 0.0015`
+  - `XGBoost accuracy_mean = 0.9083 ± 0.0017`
+
+#### 3. 运行时间观察
+
+- 在两个数据集上，树模型仍然是明显最快的主线基线
+- `TabICL` 的预测速度稳定快于 `TabPFN v2`
+- 在 `Adult full_train_reference` 中：
+  - `TabICL predict_seconds_median = 29.8600`
+  - `TabPFN v2 predict_seconds_median = 79.8174`
+- 在 `Bank Marketing full_train_reference` 中：
+  - `TabICL predict_seconds_median = 21.7999`
+  - `TabPFN v2 predict_seconds_median = 76.1499`
+
+### Phase 4 最终结论
+
+- 主线比较已经正式站稳：四个模型、两个数据集、统一结果字段、统一主表和统一文档口径都已就位
+- 在 `Adult` 上，当前更公平的 `control_10k` 主证据里，最强 baseline 仍然是树模型，`XGBoost` 和 `LightGBM` 基本并列领先
+- 在 `Bank Marketing` 上，foundation model 开始展现优势，`TabICL` 与 `TabPFN v2` 的准确率整体高于树模型
+- 在两个数据集上，`TabICL` 都表现出比 `TabPFN v2` 更好的速度表现；在 `Bank Marketing` 上，它还达到了最强或并列最强的准确率
+
+因此，Phase 4 的主线叙事已经可以写成：
+
+> 在当前统一比较框架下，树模型在 `Adult` 上仍然是更稳、更快的主线 baseline；而在 `Bank Marketing` 上，foundation model 尤其是 `TabICL` 已经展现出与树模型拉开差距的潜力。`TabICL` 相比 `TabPFN v2` 还具有更好的速度表现，因此它非常适合作为后续 Big Plus 的主方法入口。
+
+### 本阶段学到的关键点
+
+- 统一结果表真正有价值的地方，不是“都放在一起”，而是让不同模型和不同数据集可以按同一口径写进报告
+- `control_10k` 和 `full_train_reference` 同时保留，可以把“公平主证据”和“工程参考线”分开叙述
+- `TabICL` 的价值不只是准确率，还包括它比 `TabPFN v2` 更友好的运行成本
+- 模型优劣不是全局固定的，不同数据集会出现不同排序，因此双数据集主线是必要的
+
+### Phase 5 下一步
+
+- 进入 `Adult` 上的 Big Plus 主深挖
+- 围绕 `TabICL` 固定四种支持集策略：
+  - `Full Context`
+  - `Random Subset`
+  - `Balanced Random Subset`
+  - `Balanced Prototype Retrieval`
+- 先在 `Adult` 上用 `512 / 2048 / 8192` 上下文预算和 `42, 43, 44` 三个 seeds 形成第一轮方法对比
 
 ## 2026-04-23（双轨规划确立）
 
