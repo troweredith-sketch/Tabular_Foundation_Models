@@ -7,3 +7,4 @@ openml
 xgboost
 lightgbm
 tabpfn
+tabicl
