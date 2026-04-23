@@ -365,6 +365,79 @@
 
 ---
 
+## 2026-04-23（Phase 4 主线完成）
+
+### 花费时间
+
+约 1 次统一脚本开发 + 1 轮完整四模型双数据集实验 + 1 轮文档收尾
+
+### 目标
+
+- 正式进入 Phase 4
+- 在 `Adult` 上接入 `TabICL`
+- 把 `XGBoost` 补进统一主线比较
+- 将主线扩展到 `Bank Marketing`
+- 形成四模型、双数据集、双场景、五 seeds 的统一主线框架
+
+### 实际完成内容
+
+- 在项目本地 `.venv` 中安装 `tabicl==2.1.0`
+- 读取 `tabicl` 本地源码，确认：
+  - `TabICLClassifier` 的 sklearn 接口
+  - 官方 checkpoint 版本
+  - 内部 `TransformToNumerical` 预处理逻辑
+- 将 `tabicl` 补入 `requirements-basic.txt`
+- 新增统一主线脚本：`src/phase4_mainline_compare.py`
+- 让脚本支持：
+  - 数据集：`adult`、`bank_marketing`
+  - 模型：`lightgbm`、`xgboost`、`tabpfn_v2`、`tabicl`
+  - 场景：`control_10k`、`full_train_reference`
+  - seeds：默认 `42 43 44 45 46`
+- 新增 `Bank Marketing` 本地缓存：`data/raw/bank_marketing_openml.csv`
+- 完整运行：
+  - `2 datasets × 2 scenarios × 5 seeds × 4 models`
+- 生成：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+- 更新：
+  - `docs/experiment_log.md`
+  - `docs/project_record.md`
+  - `docs/work_log.md`
+  - `docs/session_handoff.md`
+  - `docs/phase_plan.md`
+  - `README.md`
+- 完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
+
+### 遇到的问题
+
+- 仓库里原本没有 `TabICL` 依赖，也没有现成的 Phase 4 主线脚本骨架
+- `TabICL` 第一次运行需要下载官方 checkpoint，如果不先处理，会污染真实计时
+- 需要在“不破坏 Phase 3 公平口径”的前提下，同时保留 full-train 参考结果
+
+### 解决方式
+
+- 先在本地环境安装 `tabicl`，再直接阅读包内源码确认真实 API
+- 在统一脚本里先预热 `TabICL` checkpoint，再开始正式计时
+- 采用双场景统一主表：
+  - `control_10k` 作为公平主证据
+  - `full_train_reference` 作为工程参考线
+- 保持结果字段尽量沿用 Phase 3，只把 `dataset` 加入 summary 分组
+
+### 学到的东西
+
+- 统一脚本不是为了“写得更大”，而是为了后面每个新模型、新数据集都能无痛进入同一口径
+- `Adult` 和 `Bank Marketing` 的模型排序并不相同，说明双数据集主线是必要的
+- `TabICL` 比 `TabPFN v2` 更像一个“可继续做方法改进”的入口，因为它更快、而且在 `Bank Marketing` 上已经达到很强的准确率
+- 报告里应该把“准确率”和“运行成本”一起讲，否则 foundation model 的优劣会被讲偏
+
+### 下一步
+
+- 进入 Phase 5
+- 在 `Adult` 上围绕 `TabICL` 开始 Big Plus 方法设计
+- 固定支持集策略与上下文预算，不要再回头改 Phase 4 主线口径
+
+---
+
 ## 记录模板
 
 ### 日期
