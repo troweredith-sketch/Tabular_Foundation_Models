@@ -47,7 +47,7 @@
 | Phase 1 | 4月16日 | 明确问题、学习基础概念、搭环境 | 已完成 |
 | Phase 2 | 4月16日-4月22日 | 跑通第一个真实数据集 baseline | 已完成 |
 | Phase 3 | 4月23日 | 主线口径修正与公平性加固 | 已完成 |
-| Phase 4 | 4月24日-4月28日 | 主线模型与数据集补齐 | 未开始 |
+| Phase 4 | 4月24日-4月28日 | 主线模型与数据集补齐 | 已完成 |
 | Phase 5 | 4月28日-5月1日 | Big Plus 方法定义与主数据集深挖 | 未开始 |
 | Phase 6 | 5月1日-5月2日 | Big Plus 次验证与稳健性判断 | 未开始 |
 | Phase 7 | 5月2日-5月4日 | 结果整合、英文报告与演示转写 | 未开始 |
@@ -170,6 +170,10 @@
 
 ## Phase 4：主线模型与数据集补齐
 
+### 完成情况
+
+已完成。
+
 ### 目标
 
 - 在 `Adult` 上正式接入 `TabICL`
@@ -187,7 +191,30 @@
 - 主线总结果表
 - 至少两个数据集的统一比较结果
 - 对 4 个模型优缺点的初步观察
+- 统一主线脚本：`src/phase4_mainline_compare.py`
+- 结果文件：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
 - 当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
+
+### 本阶段完成了什么
+
+- 在项目本地 `.venv` 中正式接入 `tabicl==2.1.0`
+- 将主线实验统一为：
+  - 数据集：`Adult`、`Bank Marketing`
+  - 模型：`TabPFN v2`、`TabICL`、`LightGBM`、`XGBoost`
+  - 场景：`control_10k`、`full_train_reference`
+  - seeds：`42, 43, 44, 45, 46`
+- 让四个模型全部进入同一张结果表，并保持 Phase 3 的字段口径
+- 完成 `Adult + Bank Marketing` 的正式多 seed 运行
+- 将结果、阶段记录和学习型文档全部同步回仓库
+
+### Phase 4 最终结论
+
+- 在 `Adult control_10k` 这个更公平的主证据场景里，树模型仍然最强，`XGBoost` 与 `LightGBM` 基本并列领先
+- 在 `Bank Marketing` 上，foundation model 开始展现优势，`TabICL` 与 `TabPFN v2` 的准确率整体高于树模型
+- `TabICL` 在两个数据集上都明显快于 `TabPFN v2`，并且在 `Bank Marketing` 上达到了最强或并列最强的准确率
+- 因此，Phase 4 不仅补齐了主线，也为 Phase 5 的 Big Plus 提供了清晰的方法入口：优先围绕 `TabICL` 展开
 
 ### 完成标准
 
@@ -385,11 +412,11 @@
 
 ## 当前默认优先顺序
 
-1. 完成 Phase 4 的主线模型与数据集补齐
-2. 在 `Adult` 上接入 `TabICL`
-3. 把 `XGBoost` 补进统一主线结果表
-4. 将主线扩展到 `Bank Marketing`
-5. 再进入 Big Plus 方法实验
+1. 进入 Phase 5，在 `Adult` 上正式定义 Big Plus 方法
+2. 固定 `TabICL` 的 4 种支持集策略，不再反复改问题定义
+3. 用 `512 / 2048 / 8192` 上下文预算和 `42 / 43 / 44` 三个 seeds 形成第一轮主数据集结果
+4. 保持 Phase 4 主线结果表作为固定参照，不再回头改主线口径
+5. 在 `Adult` 主深挖稳定后，再进入 `Bank Marketing` 次验证
 
 ## 新开对话时推荐阅读顺序
 
