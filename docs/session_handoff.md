@@ -37,6 +37,7 @@
 - 第 1 阶段已完成
 - 第 2 阶段已完成
 - 第 3 阶段已完成
+- 第 4 阶段已完成
 - 已完成第一个真实数据集实验：`Adult + LightGBM baseline`
 - 已完成第一次正式对比：`Adult + LightGBM vs TabPFN v2`
 - 已完成 `Adult 10k control` 控制实验
@@ -49,6 +50,24 @@
 - 已完成路线升级：从单线比较改为“主线比较 + Big Plus 检索改进”
 - 已新增 Big Plus 正式规划文档：`docs/big_plus_plan.md`
 - 已完成当前阶段学习型文档：`notebooks/phase3_fairness_reset.md`
+- 已在项目本地 `.venv` 中正式接入 `tabicl==2.1.0`
+- 已新增统一主线脚本：`src/phase4_mainline_compare.py`
+- 已完成 `Adult + Bank Marketing` 的四模型双场景主线比较
+- 已生成：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+- 已确认在 `Adult control_10k` 中：
+  - `XGBoost accuracy_mean = 0.8698 ± 0.0022`
+  - `LightGBM accuracy_mean = 0.8692 ± 0.0014`
+  - `TabICL accuracy_mean = 0.8681 ± 0.0026`
+  - `TabPFN v2 accuracy_mean = 0.8614 ± 0.0031`
+- 已确认在 `Bank Marketing control_10k` 中：
+  - `TabICL accuracy_mean = 0.9093 ± 0.0021`
+  - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`
+  - `LightGBM accuracy_mean = 0.9044 ± 0.0014`
+  - `XGBoost accuracy_mean = 0.9040 ± 0.0016`
+- 已确认 `TabICL` 在 `Bank Marketing` 上达到与 `TabPFN v2` 相当或略优的准确率，但预测速度明显更快
+- 已完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
 
 ## 必读文件
 
@@ -68,17 +87,18 @@
 
 ## 当前推荐下一步
 
-1. 在 `Adult` 上接入 `TabICL`
-2. 把 `XGBoost` 补进统一主线结果表
-3. 将主线扩展到 `Bank Marketing`
-4. 形成 Phase 4 的四模型双数据集主线比较
-5. 在主线稳定后，再进入 Big Plus 方法实验
+1. 在 `Adult` 上正式开始 Phase 5 的 Big Plus 方法实验
+2. 先固定 `TabICL` 的 4 种支持集策略，不要反复改问题定义
+3. 用 `512 / 2048 / 8192` 上下文预算和 `42 / 43 / 44` 三个 seeds 形成第一轮主数据集结果
+4. 保留 Phase 4 主线结果作为 Big Plus 的基础参照，不再回头改主表口径
+5. 在 `Adult` 主深挖稳定后，再进入 `Bank Marketing` 次验证
 
-## Phase 3 当前结论
+## Phase 4 当前结论
 
-- 第一层：`10k control` 的多 seed 结果说明，`LightGBM` 以 `0.8692 ± 0.0014` 稳定高于 `TabPFN v2` 的 `0.8614 ± 0.0031`
-- 第二层：full Adult 的多 seed 结果也保持同一方向，但它仍是受限条件结果，因为 `TabPFN v2` 依赖 `ignore_pretraining_limits=True`
-- 因此，Phase 3 的方向没有被推翻，而且现在不仅有 `seed=42` 锚点结果，还有多 seed 汇总结果
+- `Adult` 的公平主证据 `control_10k` 说明：树模型仍然最强，`XGBoost` 和 `LightGBM` 基本并列领先，`TabICL` 已接近但尚未超越，`TabPFN v2` 继续落后
+- `Bank Marketing` 的 `control_10k` 和 `full_train_reference` 都说明：foundation model 开始展现优势，`TabICL` 与 `TabPFN v2` 的准确率整体高于树模型
+- `TabICL` 在两个数据集上都明显快于 `TabPFN v2`，而在 `Bank Marketing` 上还达到了最强或并列最强的准确率
+- 因此，Phase 4 的主线已经足够支撑课程项目主体部分，而 `TabICL` 也已经成为最适合进入 Big Plus 的方法入口
 
 ## 阶段学习文档规则
 
