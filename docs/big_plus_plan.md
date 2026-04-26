@@ -128,27 +128,31 @@ Big Plus 固定比较以下 4 种支持集策略：
   - 用 `OneHotEncoder(handle_unknown="ignore")` one-hot 编码
   - 类别取值集合只从训练 split 学习
 - 检索向量：
-  - `z_i = [standardized_numeric_features_i, one_hot_categorical_features_i]`
+  - $\mathbf{z}_i = [\mathrm{standardized\_numeric\_features}_i, \mathrm{one\_hot\_categorical\_features}_i]$
   - 该向量只用于选择支持集；被选中的原始样本仍交给 `TabICL` 使用其自身输入处理流程
 
 距离度量固定为欧氏距离。
 对每个类别 `c`，先计算类别中心：
 
-```text
-mu_c = mean(z_i for training samples i with y_i = c)
-```
+$$
+\boldsymbol{\mu}_c
+=
+\operatorname{mean}\left(\left\{\mathbf{z}_i \mid y_i = c\right\}\right)
+$$
 
 每个训练样本的原型距离为：
 
-```text
-d_i = ||z_i - mu_{y_i}||_2
-```
+$$
+d_i
+=
+\left\lVert \mathbf{z}_i - \boldsymbol{\mu}_{y_i} \right\rVert_2
+$$
 
 类别配额规则固定如下，并同时用于 `Balanced Random Subset`：
 
 1. 设类别数为 `K`，预算为 `B`，类别 `c` 的训练样本数为 `n_c`
-2. 基础配额为 `base = floor(B / K)`，每类先取 `q_c = min(base, n_c)`
-3. 剩余预算 `R = B - sum(q_c)`
+2. 基础配额为 $\mathrm{base} = \left\lfloor B / K \right\rfloor$，每类先取 $q_c = \min(\mathrm{base}, n_c)$
+3. 剩余预算 $R = B - \sum_{c \in C} q_c$
 4. 对仍有剩余样本的类别，按训练集类别规模比例分配剩余预算
 5. 如果比例分配后仍有余数，按最大小数余量补齐；并列时按训练集类别样本数多者优先，再按类别名排序保证确定性
 6. 任一类别配额不能超过该类别训练样本数
