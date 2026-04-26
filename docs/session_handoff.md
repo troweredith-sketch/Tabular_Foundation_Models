@@ -1,8 +1,7 @@
 # 项目记忆卡
 
-这是一张给后续对话快速续接用的超短记忆卡。
-
-如果新开对话，默认先让 AI 阅读这份文件，再决定是否继续读 `docs/phase_plan.md`、`docs/project_record.md` 和 `docs/big_plus_plan.md`。
+这是一张给后续对话快速续接用的短记忆卡。
+如果新开对话，默认先读这份文件，再读 `docs/phase_plan.md`、`docs/project_record.md` 和 `docs/big_plus_plan.md`。
 
 ## 项目身份
 
@@ -11,63 +10,110 @@
 - 最终交付：英文报告 + 15 分钟演示
 - 截止时间：`2026-05-04`
 - 当前学习方式：边学习边实验
-- 当前推进方式：`双轨推进`
-
-## 用户画像
-
-- 机器学习基础：几乎零基础
-- 编程基础：会基本 Python，会一点 numpy、pandas、postgresql
-- 算力：普通笔记本，必要时可考虑云服务器
-- 目标风格：学习成长型，但愿意挑战 Big Plus
-- 可投入时间：每周约 10 小时
+- 当前推进方式：硬要求优先，再做 Big Plus
+- 报告/PPT 骨架类交付偏好：默认中英各一份，英文用于最终交付，中文作为理解和复盘参照
 
 ## 当前项目范围
 
-- 只做分类任务
+- 只做表格分类任务
 - 主线模型：`TabPFN v2`、`TabICL`、`LightGBM`、`XGBoost`
-- 数据集策略：
-  - 主深挖：`Adult`
-  - 次验证：`Bank Marketing`
-  - 备用：`Credit-G`
-- 当前 Big Plus 方向：基于 `TabICL` 的检索式支持集选择改进
-- 当前重点指标：`accuracy`、`runtime`、`context budget sensitivity`
+- 主线数据集：`Adult`、`Bank Marketing`
+- 备用数据集：`Credit-G`
+- Big Plus 方向：基于 `TabICL` 的检索式支持集选择改进
+- 不新增模型、不扩展到 regression 或 survival analysis
 
 ## 当前进度
 
-- 第 1 阶段已完成
-- 第 2 阶段已完成
-- 第 3 阶段已完成
-- 第 4 阶段已完成
-- 已完成第一个真实数据集实验：`Adult + LightGBM baseline`
-- 已完成第一次正式对比：`Adult + LightGBM vs TabPFN v2`
-- 已完成 `Adult 10k control` 控制实验
-- 已将 `src/phase3_adult_compare.py` 升级为默认 `all` 的多 seed 脚本
-- 已完成 `seeds = 42, 43, 44, 45, 46` 的 Phase 3 稳定性评估
-- 已生成 `results/phase3_adult_compare_summary.csv`
-- 已确认 full Adult 结果需要作为“受限条件结果”呈现
-- 已确认在 `10,000` 样本控制实验中，`LightGBM accuracy_mean = 0.8692 ± 0.0014`
-- 已确认在同一 `10k control` 设置下，`TabPFN v2 accuracy_mean = 0.8614 ± 0.0031`
-- 已完成路线升级：从单线比较改为“主线比较 + Big Plus 检索改进”
-- 已新增 Big Plus 正式规划文档：`docs/big_plus_plan.md`
-- 已完成当前阶段学习型文档：`notebooks/phase3_fairness_reset.md`
-- 已在项目本地 `.venv` 中正式接入 `tabicl==2.1.0`
-- 已新增统一主线脚本：`src/phase4_mainline_compare.py`
-- 已完成 `Adult + Bank Marketing` 的四模型双场景主线比较
-- 已生成：
-  - `results/phase4_mainline_compare.csv`
-  - `results/phase4_mainline_compare_summary.csv`
-- 已确认在 `Adult control_10k` 中：
+- Phase 1 已完成：明确问题、学习基础概念、搭环境
+- Phase 2 已完成：跑通 `Adult + LightGBM` baseline
+- Phase 3 已完成：完成 `Adult` 上的公平性修正、`10k control` 和多 seed 稳定性评估
+- Phase 4 已完成：完成 `Adult + Bank Marketing`、四模型、双场景、五 seeds 的主线比较
+- Phase 5 已完成：已补齐主线 `balanced_accuracy`、`macro_f1`、完整 train-size scalability、主线图表、英文报告骨架和 15 分钟 PPT 骨架
+- Phase 6 已完成：`TabICL` 支持集选择 Big Plus 方法冻结、Adult 主实验、图表和报告材料化
+- Phase 6 脚本已实现，smoke test 和完整 Adult 主实验均已完成
+- Phase 7 未开始，当前不建议启动；下一步应继续报告正文、caption、表格和展示材料整理
+
+## 已有核心结果
+
+- `Adult control_10k`：
   - `XGBoost accuracy_mean = 0.8698 ± 0.0022`
-  - `LightGBM accuracy_mean = 0.8692 ± 0.0014`
-  - `TabICL accuracy_mean = 0.8681 ± 0.0026`
-  - `TabPFN v2 accuracy_mean = 0.8614 ± 0.0031`
-- 已确认在 `Bank Marketing control_10k` 中：
-  - `TabICL accuracy_mean = 0.9093 ± 0.0021`
-  - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`
+  - `LightGBM balanced_accuracy_mean = 0.7934`，`macro_f1_mean = 0.8097`
+  - `TabICL balanced_accuracy_mean = 0.7909`，`macro_f1_mean = 0.8077`
+  - `TabPFN v2 balanced_accuracy_mean = 0.7789`，`macro_f1_mean = 0.7966`
+- `Bank Marketing control_10k`：
+  - `TabICL accuracy_mean = 0.9093 ± 0.0021`，`balanced_accuracy_mean = 0.7397`，`macro_f1_mean = 0.7606`
+  - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`，`balanced_accuracy_mean = 0.7215`，`macro_f1_mean = 0.7504`
   - `LightGBM accuracy_mean = 0.9044 ± 0.0014`
   - `XGBoost accuracy_mean = 0.9040 ± 0.0016`
-- 已确认 `TabICL` 在 `Bank Marketing` 上达到与 `TabPFN v2` 相当或略优的准确率，但预测速度明显更快
-- 已完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
+- Phase 5 train-size scalability：
+  - 完整 detail CSV 共 `200` 行，summary CSV 共 `40` 行
+  - 覆盖 `Adult`、`Bank Marketing`，train sizes 为 `512`, `2048`, `8192`, `10000`, `full`，seeds 为 `42,43,44,45,46`
+  - `Adult` 上树模型从 `512` 到 `full` 的 `macro_f1` 增幅最大，`TabPFN v2` runtime 增幅最大
+  - `Bank Marketing` 上所有模型随 train size 增大在 `balanced_accuracy` / `macro_f1` 上提升明显，`TabICL` 与 `TabPFN v2` 指标整体更强
+- Phase 5 图表和骨架：
+  - 已生成 `results/figures/phase5_scalability_accuracy.*`
+  - 已生成 `results/figures/phase5_scalability_balanced_accuracy.*`
+  - 已生成 `results/figures/phase5_scalability_macro_f1.*`
+  - 已生成 `results/figures/phase5_scalability_total_seconds_median.*`
+  - 已创建英文版 `report/outline.md` 和 `slides/outline.md`
+  - 已创建中文版参照 `report/outline_zh.md` 和 `slides/outline_zh.md`
+- `TabICL` 在两个数据集上都明显快于 `TabPFN v2`，因此仍是 Big Plus 的合适入口
+- Phase 6 方法冻结：
+  - 已创建 `notebooks/phase6_big_plus_adult.md`
+  - 已新增 `src/phase6_big_plus_adult.py`
+  - 已冻结四种策略：`Full Context`、`Random Subset`、`Balanced Random Subset`、`Balanced Prototype Retrieval`
+  - `Balanced Prototype Retrieval` 固定使用训练 split 构造检索空间：数值特征 median 填补 + 标准化，类别特征 most frequent 填补 + one-hot
+  - 距离度量固定为欧氏距离，类内选择最接近类别中心的样本
+  - 类别配额先按类别平衡分配，剩余预算按训练集类别规模比例补齐；类别样本不足时全部保留并重分配剩余预算
+  - 不使用测试标签、测试特征或测试分布
+  - 预算固定为 `512`、`2048`、`8192`，seeds 固定为 `42`、`43`、`44`
+- Phase 6 smoke test：
+  - 命令：`python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42`
+  - 已生成 `results/phase6_big_plus_adult.csv` 和 `results/phase6_big_plus_adult_summary.csv`
+  - smoke test 只作为历史工程记录，不作为正式结论
+- Phase 6 Adult 主实验：
+  - detail CSV：`results/phase6_big_plus_adult.csv`，共 `30` 行
+  - summary CSV：`results/phase6_big_plus_adult_summary.csv`，共 `10` 行
+  - strategies：`full_context`、`random_subset`、`balanced_random_subset`、`balanced_prototype_retrieval`
+  - budgets：`512`、`2048`、`8192`
+  - seeds：`42`、`43`、`44`
+  - 已确认 `requested_budget`、`actual_support_size`、`support_class_counts` 都被记录且无缺失
+  - 三个 budget-limited 策略在同一 `budget/seed` 下 `requested_budget` 一致
+- Phase 6 结果图表：
+  - `results/figures/phase6_big_plus_adult_accuracy.*`
+  - `results/figures/phase6_big_plus_adult_balanced_accuracy.*`
+  - `results/figures/phase6_big_plus_adult_macro_f1.*`
+  - `results/figures/phase6_big_plus_adult_total_seconds_median.*`
+  - `results/figures/phase6_big_plus_adult_bpr_delta.*`
+- Phase 6 报告材料：
+  - `report/phase6_big_plus_results.md`
+  - `report/phase6_big_plus_results_zh.md`
+  - `notebooks/phase6_big_plus_adult.md`
+- Phase 6 核心结论：
+  - `Balanced Prototype Retrieval` 没有优于 `Random Subset` / `Balanced Random Subset`
+  - `Balanced Random Subset` 在 balanced accuracy 上最强
+  - `Random Subset` 在 accuracy 和 macro-F1 上更稳
+  - `Full Context` 效果最好但 runtime 明显更高
+  - 这是有价值的负结果，不要为了追分修改冻结方法
+
+## 当前必须保留的口径
+
+- 主线已补齐 `balanced_accuracy`、`macro_f1`、train-size scalability、size-vs-metric / size-vs-runtime 图表和英文报告/PPT 骨架
+- 主线目前已经可以独立支撑课程报告
+- 当前多 seed 实验应表述为 repeated stratified splits：每个 seed 内模型共享同一 split，跨 seeds 不是同一个固定测试集
+- 当前 runtime 是 practical mixed-device timing，树模型在 CPU，foundation models 可能在 GPU
+- 当前树模型是 fixed strong baselines，不是 tuned SOTA baselines
+- 当前 `Adult` 和 `Bank Marketing` 是 OpenML datasets，不能包装成 TALENT 或 TabArena 实验
+- Phase 6 Adult 主实验已经完成，但不要把 Big Plus 写成成功方法
+- Phase 6 smoke test 只是历史工程记录；正式结论以 30 行 Adult 主实验为准
+- 当前冻结版 `Balanced Prototype Retrieval` 未超过强随机 baseline，应写成负结果 ablation
+- `Full Context` 是完整训练 split reference，不是和 `512/2048/8192` 完全预算公平的 baseline
+
+## 当前推荐下一步
+
+1. 继续 Phase 6 论文/报告整理：英文正文段落、figure captions、结果表和讨论段。
+2. 把 `report/phase6_big_plus_results.md` 的内容压缩进最终报告正文。
+3. 更新 PPT/展示材料中的 Big Plus 页，但暂不启动 Phase 7。
 
 ## 必读文件
 
@@ -80,38 +126,11 @@
 
 ## 高优先级原则
 
-- 优先帮助用户理解，而不是只给结果
-- 主线比较必须先站稳，再推进 Big Plus
+- 优先补齐原始要求，不盲目追求复杂模型
+- 主线必须能独立成稿，Big Plus 是加分项
 - 每推进一个阶段，就同步更新 `docs/` 和 `notebooks/phaseX_*.md`
+- 报告/PPT 骨架、展示叙事、最终提纲默认中英各一份
 - 不要让不同文档出现互相冲突的“下一步”
-
-## 当前推荐下一步
-
-1. 在 `Adult` 上正式开始 Phase 5 的 Big Plus 方法实验
-2. 先固定 `TabICL` 的 4 种支持集策略，不要反复改问题定义
-3. 用 `512 / 2048 / 8192` 上下文预算和 `42 / 43 / 44` 三个 seeds 形成第一轮主数据集结果
-4. 保留 Phase 4 主线结果作为 Big Plus 的基础参照，不再回头改主表口径
-5. 在 `Adult` 主深挖稳定后，再进入 `Bank Marketing` 次验证
-
-## Phase 4 当前结论
-
-- `Adult` 的公平主证据 `control_10k` 说明：树模型仍然最强，`XGBoost` 和 `LightGBM` 基本并列领先，`TabICL` 已接近但尚未超越，`TabPFN v2` 继续落后
-- `Bank Marketing` 的 `control_10k` 和 `full_train_reference` 都说明：foundation model 开始展现优势，`TabICL` 与 `TabPFN v2` 的准确率整体高于树模型
-- `TabICL` 在两个数据集上都明显快于 `TabPFN v2`，而在 `Bank Marketing` 上还达到了最强或并列最强的准确率
-- 因此，Phase 4 的主线已经足够支撑课程项目主体部分，而 `TabICL` 也已经成为最适合进入 Big Plus 的方法入口
-
-## 阶段学习文档规则
-
-- 从现在起，每推进一个阶段，都要在 `notebooks/` 下新增一篇中文学习型 `md`
-- 风格固定为“教学 + 复盘”
-- 固定结构：
-  1. 阶段目标
-  2. 这一阶段做了什么
-  3. 关键概念学习
-  4. 为什么这样设计
-  5. 当前结果说明了什么
-  6. 遇到的问题与风险
-  7. 下一阶段怎么接
 
 ## 常用情景模板
 
@@ -123,55 +142,24 @@
 先用 5 条总结当前项目状态，再继续帮助我完成下一步。
 ```
 
-### 2. 完成一个阶段后更新记录
+### 2. 开始今天的工作
 
 ```text
-我刚完成了一个阶段。请先阅读 docs/session_handoff.md 和 docs/project_record.md，
-然后把本次进展同步更新到 docs/project_record.md、docs/work_log.md、docs/session_handoff.md，
-并补写本阶段对应的 notebooks/phaseX_*.md。
-如果有真实实验结果，再同步更新 docs/experiment_log.md。
-最后给我一版“当前状态 + 下一步”的简短总结。
+请先阅读 docs/session_handoff.md、docs/phase_plan.md、docs/experiment_log.md，
+告诉我今天最适合推进的 1-2 个任务，并说明为什么先做它们。
 ```
 
 ### 3. 完成一次实验后更新记录
 
 ```text
-我刚完成了一次实验。请先阅读 docs/session_handoff.md、docs/experiment_log.md、docs/big_plus_plan.md，
+我刚完成了一次实验。请先阅读 docs/session_handoff.md、docs/experiment_log.md、docs/phase_plan.md，
 把这次实验的设置、结果、观察和下一步写进 docs/experiment_log.md，
-并同步补充 docs/work_log.md。
-如果这次实验对应一个阶段收尾，也要补写 notebooks/phaseX_*.md。
+并同步补充 docs/work_log.md、docs/project_record.md 和 docs/session_handoff.md。
 ```
 
-### 4. 需要短交接摘要
+### 4. 写报告或做展示前
 
 ```text
-请先阅读 docs/session_handoff.md、docs/project_record.md、docs/work_log.md、docs/experiment_log.md、docs/big_plus_plan.md，
-然后给我一版短交接摘要，只包含：
-1. 当前做到哪一步
-2. 最近完成了什么
-3. 现在卡在哪里
-4. 下一步最优先做什么
-```
-
-### 5. 开始今天的工作
-
-```text
-请先阅读 docs/session_handoff.md、docs/phase_plan.md、docs/big_plus_plan.md、docs/experiment_log.md，
-告诉我今天最适合推进的 1-2 个任务，并说明为什么先做它们。
-```
-
-### 6. 写报告或做展示前
-
-```text
-请先阅读 docs/session_handoff.md、docs/project_record.md、docs/experiment_log.md、docs/big_plus_plan.md，
+请先阅读 docs/session_handoff.md、docs/project_record.md、docs/experiment_log.md、docs/phase_plan.md，
 基于当前项目进度，帮我整理一版可以直接转成英文报告/PPT 的结构化要点。
 ```
-
-## 更新规则
-
-如果项目状态发生变化，优先更新以下 4 项：
-
-1. `当前进度`
-2. `当前推荐下一步`
-3. `阶段学习文档规则`
-4. `常用情景模板` 是否需要调整

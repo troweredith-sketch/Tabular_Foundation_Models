@@ -8,10 +8,10 @@ Tabular Foundation Models
 
 比较 `TabPFN v2`、`TabICL` 等表格基础模型与 `XGBoost`、`LightGBM` 等传统树模型在中小型表格分类数据集上的表现，并分析它们在准确率、运行速度和适用场景上的差异。
 
-从 `2026-04-23` 起，项目策略升级为“双轨推进”：
+从 `2026-04-23` 起，项目策略升级为“双轨推进”；从 `2026-04-24` 起，后续优先级进一步调整为“先补课程硬要求，再做 Big Plus，最后集中交付”：
 
-- `主线轨道`：完成课程项目主体比较结果
-- `Big Plus 轨道`：围绕 `TabICL` 做检索式支持集选择改进
+- `主线轨道`：完成课程项目主体比较、指标补强、scalability 和 pros/cons 分析
+- `Big Plus 轨道`：在主线硬要求闭环后，围绕 `TabICL` 做检索式支持集选择改进
 
 当前项目问题：
 
@@ -23,18 +23,19 @@ Tabular Foundation Models
 | --- | --- | --- | --- | --- |
 | Phase 1 | 明确问题、学习基础概念、搭环境、完成教学实验 | 已完成 | 2026-04-16 | 中文概念 notebook、本地环境、GitHub 仓库 |
 | Phase 2 | 加载第一个真实数据集并跑通一个 baseline | 已完成 | 2026-04-22 | Adult baseline notebook、first_result.csv |
-| Phase 3 | 主线口径修正与公平性加固 | 已完成 | 2026-04-23 | 统一结果字段、full Adult 受限结果、10k 控制实验、多 seed summary、Phase 3 学习 md |
-| Phase 4 | 主线模型与数据集补齐 | 已完成 | 2026-04-23 | 四模型双数据集统一脚本、Phase 4 总结果表、Phase 4 学习 md |
-| Phase 5 | Big Plus 方法定义与主数据集深挖 | 未开始 | - | 待补充 |
-| Phase 6 | Big Plus 次验证与稳健性判断 | 未开始 | - | 待补充 |
-| Phase 7 | 结果整合、英文报告与演示转写 | 未开始 | - | 待补充 |
+| Phase 3 | 主线口径修正与公平性加固 | 已完成，但文档表述需补改 | 2026-04-23 | 统一结果字段、full Adult 受限结果、10k 控制实验、多 seed summary、Phase 3 学习 md |
+| Phase 4 | 主线模型与数据集补齐 | 已完成，指标和 scalability 已在 Phase 5 补强 | 2026-04-23 | 四模型双数据集统一脚本、Phase 4 总结果表、Phase 4 学习 md |
+| Phase 5 | 主线硬要求闭环与结果补强 | 已完成 | 2026-04-26 | 更新后的主线指标表、scalability 结果、主线图表、英文报告/PPT 骨架、Phase 5 学习 md |
+| Phase 6 | Big Plus 方法冻结、Adult 主实验与结果材料化 | Adult 主实验已完成，结果图表和报告材料已整理 | 2026-04-27 | Phase 6 学习 md、Big Plus 方法冻结 v1、Phase 6 脚本、Adult 结果 CSV、Phase 6 图表、报告结果摘要 |
+| Phase 7 | Big Plus 次验证与稳健性判断 | 未开始，当前不启动 | - | 待补充 |
+| Phase 8 | 报告、图表、PPT 和最终提交整理 | 未开始 | - | 待补充 |
 
 ## 当前进度
 
 - 已完成第一阶段
 - 已完成第二阶段
-- 已完成 Phase 3
-- 已完成 Phase 4
+- 已完成 Phase 3，并已在后续文档中修正 repeated stratified splits 的表述
+- 已完成 Phase 4，并已在 Phase 5 补齐 `balanced_accuracy`、`macro_f1`、train-size scalability、主线图表和报告/PPT 骨架
 - 已完成第一次正式模型对比：`Adult + LightGBM vs TabPFN v2`
 - 已补做 `Adult 10k control` 控制实验
 - 已将 `src/phase3_adult_compare.py` 升级为默认 `all` 的多 seed 脚本
@@ -67,9 +68,49 @@ Tabular Foundation Models
   - `TabPFN v2 accuracy_mean = 0.9093 ± 0.0013`
   - `LightGBM accuracy_mean = 0.9044 ± 0.0014`
   - `XGBoost accuracy_mean = 0.9040 ± 0.0016`
+- 已完成 Phase 5 第一块主线指标补齐：
+  - `results/phase4_mainline_compare.csv` 已包含 `balanced_accuracy` 和 `macro_f1`
+  - `results/phase4_mainline_compare_summary.csv` 已包含 `balanced_accuracy_mean/std/min/max` 和 `macro_f1_mean/std/min/max`
+  - summary 校验为 `16` 行，每行 `n_runs = 5`
+- 已确认在 `Bank Marketing control_10k` 中，`TabICL` 与 `TabPFN v2` 的 `accuracy_mean` 相同，但 `TabICL` 的 `balanced_accuracy_mean = 0.7397`、`macro_f1_mean = 0.7606` 更高
 - 已确认 `TabICL` 在 `Bank Marketing` 上达到与 `TabPFN v2` 相近或略优的准确率，但预测时间明显更短
 - 已完成当前阶段学习型文档：`notebooks/phase4_mainline_completion.md`
 - 已把“每推进一个阶段就写一篇 notebooks 中文 md”升级为硬性规则
+- 已完成 Phase 5 第三步：主线图表与报告/PPT 骨架整理
+- 已生成 Phase 5 scalability 图表：
+  - `results/figures/phase5_scalability_accuracy.png`
+  - `results/figures/phase5_scalability_balanced_accuracy.png`
+  - `results/figures/phase5_scalability_macro_f1.png`
+  - `results/figures/phase5_scalability_total_seconds_median.png`
+- 已创建英文报告骨架：`report/outline.md`
+- 已创建 15 分钟英文 PPT 骨架：`slides/outline.md`
+- 当前主线已经可以独立支撑课程报告
+- 已完成 Phase 6：`TabICL` 支持集选择方法冻结、Adult 主实验、图表和报告材料化
+- 已创建并更新 `notebooks/phase6_big_plus_adult.md`，记录方法定义、实验设计、主实验结果和论文写法建议
+- 已新增 Phase 6 实验脚本：`src/phase6_big_plus_adult.py`
+- 已冻结四种支持集策略：`Full Context`、`Random Subset`、`Balanced Random Subset`、`Balanced Prototype Retrieval`
+- 已明确 `Balanced Prototype Retrieval` 的检索空间、标准化、one-hot、欧氏距离、类别配额、样本不足处理、信息边界和 budget/seed 对齐规则
+- 已完成 `Adult + budget=512 + seed=42` smoke test
+- 已完成完整 Adult 主实验：
+  - strategies：`full_context`、`random_subset`、`balanced_random_subset`、`balanced_prototype_retrieval`
+  - budgets：`512`、`2048`、`8192`
+  - seeds：`42`、`43`、`44`
+- 已生成：
+  - `results/phase6_big_plus_adult.csv`
+  - `results/phase6_big_plus_adult_summary.csv`
+- 已确认完整 Adult 主实验 detail 为 `30` 行、summary 为 `10` 行，四种策略齐全
+- 已确认 `requested_budget`、`actual_support_size`、`support_class_counts` 都被记录且无缺失
+- 已生成 Phase 6 图表：
+  - `results/figures/phase6_big_plus_adult_accuracy.png`
+  - `results/figures/phase6_big_plus_adult_balanced_accuracy.png`
+  - `results/figures/phase6_big_plus_adult_macro_f1.png`
+  - `results/figures/phase6_big_plus_adult_total_seconds_median.png`
+  - `results/figures/phase6_big_plus_adult_bpr_delta.png`
+- 已创建 Phase 6 报告材料：
+  - `report/phase6_big_plus_results.md`
+  - `report/phase6_big_plus_results_zh.md`
+- Phase 6 正式结论：冻结版 `Balanced Prototype Retrieval` 没有超过 `Random Subset` / `Balanced Random Subset`；这是有价值的负结果，不应回改冻结方法追分
+- 下一步应继续 Phase 6 论文正文、caption、表格和展示材料整理，而不是启动 Phase 7
 
 ## Phase 1 完成记录
 
@@ -345,13 +386,13 @@ Tabular Foundation Models
 
 ### Phase 5 下一步
 
-- 进入 `Adult` 上的 Big Plus 主深挖
-- 围绕 `TabICL` 固定四种支持集策略：
-  - `Full Context`
-  - `Random Subset`
-  - `Balanced Random Subset`
-  - `Balanced Prototype Retrieval`
-- 先在 `Adult` 上用 `512 / 2048 / 8192` 上下文预算和 `42, 43, 44` 三个 seeds 形成第一轮方法对比
+- 进入主线硬要求闭环与结果补强，而不是直接进入 Big Plus
+- 在主线结果中补 `balanced_accuracy` 和 `macro_f1`
+- 增加 train-size scalability：`512 / 2048 / 8192 / 10000 / full`
+- 修正文档中的 split protocol 表述：每个 seed 内模型共享同一 split，跨 seeds 是 repeated stratified splits
+- 在文档和报告中加入 runtime caveat：当前 speed 是 practical mixed-device timing
+- 在文档和报告中加入 baseline caveat：当前树模型是 fixed strong baselines，不是 tuned SOTA baselines
+- 建立 `report/` 和 `slides/` 骨架，避免最终交付被 Big Plus 挤压
 
 ## 2026-04-23（双轨规划确立）
 
@@ -375,6 +416,146 @@ Tabular Foundation Models
 这次不是简单改一条“下一步”，而是重置整个项目的推进逻辑。  
 如果没有这次文档重构，后续会同时出现两套不同优先级，导致实验、记录和报告叙事互相打架。
 
+## 2026-04-24（硬要求优先路线确立）
+
+### 目标
+
+- 综合两份代码审查意见和原始项目要求
+- 判断当前项目是否应该继续沿用原方向
+- 重新安排 Phase 5 之后的优先级
+
+### 本次完成内容
+
+- 确认项目方向正确，不需要换题、不新增模型、不扩展任务类型
+- 确认 Phase 1-4 已完成内容可以保留，但 Phase 3/4 的实验口径和结果字段需要补强
+- 将当前下一阶段从“Big Plus 主深挖”调整为“主线硬要求闭环”
+- 将 Big Plus 顺延为 Phase 6 和 Phase 7
+- 将最终交付整理顺延为 Phase 8
+
+### 新优先级
+
+1. Phase 5：补 `balanced_accuracy`、`macro_f1`、train-size scalability、split protocol、runtime caveat 和 report/slides 骨架
+2. Phase 6：冻结并运行 `TabICL` 支持集选择 Big Plus
+3. Phase 7：在 `Bank Marketing` 上做 Big Plus 次验证
+4. Phase 8：完成英文报告、图表、PPT 和最终提交
+
+## 2026-04-26（Phase 5 第三步完成）
+
+### 目标
+
+- 把已经完成的 Phase 4/5 主线结果整理成英文报告和 15 分钟展示可用的图表与结构化叙事
+- 不进入 Big Plus，不新增模型，不调参，不扩展任务类型
+
+### 本次完成内容
+
+- 新增 `src/phase5_make_mainline_figures.py`
+- 从 `results/phase5_scalability_compare_summary.csv` 生成 4 组 scalability 图表
+- 图表统一输出到 `results/figures/`，同时保存 PNG 和 PDF
+- 创建 `report/outline.md`
+- 创建 `slides/outline.md`
+- 在报告和展示骨架中明确 Adult、Bank Marketing、train-size scalability、runtime 和四模型优缺点
+- 写入 runtime caveat、split caveat、baseline caveat 和 full-reference caveat
+
+### 本步骤目的
+
+Phase 5 第三步把已完成的主线实验结果整理成可用于英文报告和 15 分钟展示的图表与结构化叙事。
+
+### 当前判断
+
+- 主线已经可以独立写成课程报告
+- 后续不需要回头补主线硬要求，除非最终写作时需要微调表达
+- 已进入 Phase 6，并已完成 `TabICL` 支持集选择 Big Plus 方法冻结
+- Big Plus 方向保持不变
+
+## 2026-04-26（Phase 6 方法冻结完成）
+
+### 目标
+
+- 进入 Phase 6 第一步，先冻结 Big Plus 方法，而不是直接启动完整长实验
+- 保持主线范围不变，不新增模型、不调参、不扩展到 regression 或 survival analysis
+- 把 `TabICL` 支持集选择策略写清楚，保证后续实验不边跑边改
+
+### 本次完成内容
+
+- 新增 Phase 6 学习型文档：`notebooks/phase6_big_plus_adult.md`
+- 更新 `docs/big_plus_plan.md`，将 Big Plus 方法冻结为 `v1`
+- 固定四种支持集策略：
+  - `Full Context`
+  - `Random Subset`
+  - `Balanced Random Subset`
+  - `Balanced Prototype Retrieval`
+- 明确 `Balanced Prototype Retrieval`：
+  - 检索空间只由训练 split 构造
+  - 数值特征用训练 split median 填补，并用训练 split mean/std 标准化
+  - 类别特征用训练 split most frequent 填补，并用训练 split 拟合 one-hot
+  - 距离度量为欧氏距离
+  - 类别配额先平衡，再按训练集类别规模比例补齐
+  - 类别样本不足时全部保留并重分配剩余预算，不重复样本
+  - 不使用测试标签、测试特征或测试分布
+  - 与随机 baseline 使用相同 budgets、seeds 和 train/test splits
+- 固定 Adult 主实验设置：
+  - 数据集：`Adult`
+  - 预算：`512`、`2048`、`8192`
+  - seeds：`42`、`43`、`44`
+  - 次验证数据集 `Bank Marketing` 留到 Phase 7
+
+### 当前判断
+
+- Phase 6 方法冻结/设计已经完成
+- Phase 6 脚本实现和 smoke test 已完成
+- 还没有运行完整 Adult 主实验
+- smoke test 不能写成 Big Plus 已成功或失败
+- 可以进入脚本审查，确认后再运行完整 Adult 主实验
+
+### 下一步
+
+- 审查 `src/phase6_big_plus_adult.py`
+- 确认 quota 分配、BPR 信息边界和 CSV schema
+- 确认后再运行完整 Adult 主实验
+
+## 2026-04-26（Phase 6 脚本实现与 smoke test）
+
+### 目标
+
+- 实现 `Adult + TabICL` 支持集选择实验脚本
+- 实现四种已冻结策略
+- 先跑 `budget=512, seed=42` smoke test，不启动完整长实验
+
+### 本次完成内容
+
+- 新增 `src/phase6_big_plus_adult.py`
+- 实现四种策略：
+  - `full_context`
+  - `random_subset`
+  - `balanced_random_subset`
+  - `balanced_prototype_retrieval`
+- 复用 Phase 4 的 Adult 数据加载、stratified split、TabICL 运行和指标计算
+- 实现 frozen quota 分配规则
+- 实现 train-only 检索空间构造
+- 运行 smoke test：
+
+```bash
+python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42
+```
+
+### Smoke test 结果
+
+- detail CSV：`results/phase6_big_plus_adult.csv`，共 `4` 行
+- summary CSV：`results/phase6_big_plus_adult_summary.csv`，共 `4` 行
+- 四种策略均运行成功
+- `requested_budget`、`actual_support_size`、`support_class_counts` 均已写入且无缺失
+
+### 当前判断
+
+- 脚本和 schema 已跑通
+- `Full Context` 本次 runtime 较长，完整 Adult 主实验需要显式确认后再启动
+- 单次 smoke test 不作为 Big Plus 正式有效性判断
+
+### 下一步
+
+- 对脚本做一次实现审查
+- 如果无问题，再运行完整 Adult 主实验：`512/2048/8192 × seeds 42/43/44`
+
 ## 协作记忆入口
 
 为了避免对话过长后上下文丢失，后续协作默认优先参考以下文件：
@@ -388,7 +569,7 @@ Tabular Foundation Models
 ## 展示时可以强调的亮点
 
 - 项目不是只跑代码，而是按阶段逐步学习并构建实验能力
-- 现在不仅有主线比较，还有一个清楚定义的 Big Plus 方法方向
+- 现在不仅有主线比较，还有清楚的硬要求补强路线和 Big Plus 方法方向
 - 项目过程有完整文档沉淀，后续适合直接转化为报告与展示材料
 
 ## 更新规则

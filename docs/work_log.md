@@ -433,8 +433,476 @@
 ### 下一步
 
 - 进入 Phase 5
-- 在 `Adult` 上围绕 `TabICL` 开始 Big Plus 方法设计
-- 固定支持集策略与上下文预算，不要再回头改 Phase 4 主线口径
+- 先补齐主线 `balanced_accuracy` 和 `macro_f1`
+- 再补 train-size scalability
+- Big Plus 顺延到 Phase 6
+
+---
+
+## 2026-04-24（Phase 5 指标补齐完成）
+
+### 花费时间
+
+约 1 次 smoke test + 1 轮完整主线重跑 + 文档同步
+
+### 目标
+
+- 完成 Phase 5 第一块：补齐 `accuracy` 之外的主线分类指标
+- 让 Phase 4 主线结果同时包含 `balanced_accuracy` 和 `macro_f1`
+- 不改变 Big Plus 方向，不新增模型，不扩展任务类型
+
+### 实际完成内容
+
+- 修改 `src/phase4_mainline_compare.py`
+  - 新增 `balanced_accuracy_score`
+  - 新增 `f1_score(average="macro")`
+  - 四个模型统一写入 `accuracy`、`balanced_accuracy`、`macro_f1`
+  - detail CSV 和 summary CSV 都扩展新指标列
+- 先完成 smoke test：
+  - `python3 src/phase4_mainline_compare.py --datasets adult --scenarios control_10k --seeds 42`
+- 之后完整重跑主线：
+  - `python3 src/phase4_mainline_compare.py --datasets adult bank_marketing --scenarios control_10k full_train_reference --seeds 42 43 44 45 46`
+- 重新生成：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+- 校验结果：
+  - detail CSV 共 `80` 行
+  - summary CSV 共 `16` 行
+  - 每个 summary 组合 `n_runs = 5`
+  - seeds 均为 `42,43,44,45,46`
+- 更新：
+  - `docs/experiment_log.md`
+  - `docs/project_record.md`
+  - `docs/work_log.md`
+  - `docs/session_handoff.md`
+  - `docs/phase_plan.md`
+  - `notebooks/phase5_mainline_requirements_closure.md`
+
+### 遇到的问题
+
+- 第一次后台启动完整实验时被外层命令超时机制截断，留下了不完整 CSV
+- PowerShell 与 WSL 混合执行时，部分 here-doc / 引号写法会被错误解释
+
+### 解决方式
+
+- 改用 detached WSL 进程重新从头跑完整主线
+- 用 `/tmp/tfm_phase5_mainline_rerun.log` 监控日志
+- 用 CSV 行数和 summary 校验脚本确认最终结果完整
+
+### 学到的东西
+
+- 对不平衡数据集，只看 `accuracy` 容易漏掉重要差异
+- 在 `Bank Marketing control_10k` 中，`TabICL` 和 `TabPFN v2` 的 `accuracy_mean` 相同，但 `TabICL` 的 `balanced_accuracy_mean` 和 `macro_f1_mean` 更高
+- 长实验最好先做 smoke test，再完整重跑，并保留旧结果备份
+
+### 下一步
+
+- 进入 Phase 5 第二块：train-size scalability
+- 默认 size grid：`512`, `2048`, `8192`, `10000`, `full`
+- 继续只做当前四个模型和两个数据集，不新增模型、不调参、不进入 Big Plus
+
+---
+
+## 2026-04-24（Phase 5 完整 train-size scalability 完成）
+
+### 花费时间
+
+约 1 次完整长实验 + 校验 + 文档同步
+
+### 目标
+
+- 完成 Phase 5 第二块：train-size scalability
+- 用固定模型、固定数据集、固定指标观察不同训练规模下的性能和运行时间变化
+- 保持 Big Plus 方向不变，不新增模型、不调参、不扩展任务类型
+
+### 实际完成内容
+
+- 确认 smoke test 状态：
+  - `src/phase5_scalability_compare.py` 已存在
+  - `results/phase5_scalability_compare.csv` 已存在
+  - `results/phase5_scalability_compare_summary.csv` 已存在
+  - smoke 覆盖 `Adult + train_size=512 + seed=42 + 四个模型`
+- 启动并完成完整 scalability 实验：
+
+```bash
+python3 src/phase5_scalability_compare.py \
+  --datasets adult bank_marketing \
+  --train-sizes 512 2048 8192 10000 full \
+  --seeds 42 43 44 45 46
+```
+
+- 覆盖并生成：
+  - `results/phase5_scalability_compare.csv`
+  - `results/phase5_scalability_compare_summary.csv`
+- 没有写入 Phase 4 结果文件：
+  - `results/phase4_mainline_compare.csv`
+  - `results/phase4_mainline_compare_summary.csv`
+
+### 校验结果
+
+- 实验退出码：`0`
+- detail CSV：`200` 行
+- summary CSV：`40` 行
+- 每个 summary 组合：`n_runs = 5`
+- seeds：`42,43,44,45,46`
+- detail 组合最小/最大行数：`5 / 5`
+- duplicate detail rows：`0`
+- required detail / summary columns：无缺失
+
+### 主要观察
+
+- `Adult` 上，树模型从 `512` 到 `full` 的 `macro_f1` 增幅最大，尤其 `LightGBM`；`TabPFN v2` 指标提升最小但 runtime 增幅最大。
+- `Bank Marketing` 上，所有模型随 train size 增大在 `balanced_accuracy` / `macro_f1` 上提升明显；`TabICL` 和 `TabPFN v2` 指标整体更强。
+- runtime 最明显变化来自 foundation models：`TabPFN v2` 从几秒增长到约 `80` 秒量级，`TabICL` 从约 `3` 秒增长到约 `20` 秒量级；树模型仍保持亚秒到约 `1` 秒量级。
+- `TabICL` 的 full runtime 明显低于 `TabPFN v2`，这继续支持后续 Big Plus 以 `TabICL` 为入口。
+
+### 遇到的问题
+
+- 上一个对话中完整实验已经启动但尚未收尾，当前对话需要先确认后台进程、日志、CSV 行数和退出码。
+- 系统 Python 没有 `pandas`，校验脚本需要进入项目 `.venv` 后运行。
+
+### 解决方式
+
+- 继续监控原后台进程，没有重启实验。
+- 用 `/tmp/tfm_phase5_scalability_full.log`、CSV 行数和退出码确认实验完成。
+- 用 `.venv` 中的 `python3` 读取 CSV 做完整性校验。
+
+### 学到的东西
+
+- 完整 scalability 最慢部分集中在 `full` train size 下的 `TabPFN v2` 和 `TabICL`。
+- 对 `Bank Marketing` 这类不平衡数据集，`balanced_accuracy` 和 `macro_f1` 比单看 `accuracy` 更能体现 train size 增长带来的改进。
+- scalability 图表需要同时画 metric 和 runtime，否则容易只看到性能提升而忽略运行成本。
+
+### 下一步
+
+- 进入 Phase 5 的图表/报告骨架整理
+- 优先生成 size-vs-metric 和 size-vs-runtime 图表草稿
+- 建立英文报告和 PPT 的主线结果结构
+- Big Plus 继续顺延到主线图表和报告骨架稳定之后
+
+---
+
+## 2026-04-26（Phase 5 主线图表与报告/PPT 骨架完成）
+
+### 花费时间
+
+约 1 次结果整理 + 文档同步
+
+### 目标
+
+- 完成 Phase 5 第三步：主线图表和报告/PPT 骨架整理
+- 只使用已有 Phase 4/5 结果，不重跑实验、不新增模型、不调参、不进入 Big Plus
+- 把已完成的主线实验转成可用于英文报告和 15 分钟展示的结构化材料
+
+### 实际完成内容
+
+- 新增可复现画图脚本：`src/phase5_make_mainline_figures.py`
+- 从 `results/phase5_scalability_compare_summary.csv` 生成英文图表草稿
+- 新建图表输出目录：`results/figures/`
+- 生成 4 组 PNG/PDF 图表：
+  - `phase5_scalability_accuracy`
+  - `phase5_scalability_balanced_accuracy`
+  - `phase5_scalability_macro_f1`
+  - `phase5_scalability_total_seconds_median`
+- 创建英文报告骨架：`report/outline.md`
+- 创建 15 分钟英文 PPT 骨架：`slides/outline.md`
+- 在报告和 PPT 骨架中写入 Adult、Bank Marketing、train-size scalability、runtime 和四模型优缺点的主线观察
+- 明确写入 runtime caveat、split caveat、baseline caveat 和 full-reference caveat
+
+### 本步骤目的
+
+Phase 5 第三步把已完成的主线实验结果整理成可用于英文报告和 15 分钟展示的图表与结构化叙事。
+
+### 遇到的问题
+
+- `report/` 和 `slides/` 目录原本只有 `.gitkeep`，需要新建正式 outline 文件
+- 图表需要同时服务英文报告和 PPT，因此必须用清晰英文标题、稳定模型颜色和双数据集 subplot
+
+### 解决方式
+
+- 将画图逻辑做成独立脚本，只读取已有 summary CSV，不改动实验结果
+- 每张图都用 `Adult` 与 `Bank Marketing` 两个 subplot，固定 train-size 顺序为 `512`, `2048`, `8192`, `10000`, `full`
+- runtime 图使用 log-scale y 轴，让树模型和 foundation models 的时间差异都可读
+
+### 学到的东西
+
+- 主线结果不仅需要 CSV，还需要被压缩成报告和展示能直接使用的叙事结构
+- `Bank Marketing` 的结论必须依赖 `balanced_accuracy` 和 `macro_f1`，不能只看 `accuracy`
+- runtime 结果可以说明实际使用成本，但必须保留 practical mixed-device timing 的限制说明
+
+### 下一步
+
+- Phase 5 主线已经可以独立支撑课程报告
+- 后续已进入 Phase 6，并完成 `TabICL` 支持集选择 Big Plus 方法冻结
+- Big Plus 方向保持不变，不新增模型、不扩展到 regression 或 survival analysis
+
+---
+
+## 2026-04-26（补充中文版报告/PPT 骨架）
+
+### 花费时间
+
+约 1 次文档补齐
+
+### 目标
+
+- 给已经创建的英文报告和 PPT 骨架补一份中文版参照
+- 记录后续偏好：报告/PPT 骨架类材料默认中英各一份
+
+### 实际完成内容
+
+- 新增中文版报告骨架：`report/outline_zh.md`
+- 新增中文版 15 分钟展示骨架：`slides/outline_zh.md`
+- 更新 `docs/session_handoff.md`，记录“报告/PPT 骨架类交付默认中英各一份”
+
+### 下一步
+
+- 后续写报告正文、PPT 叙事或阶段性 presentation outline 时，默认同时保留英文交付版和中文参照版。
+
+---
+
+## 2026-04-26（Phase 6 Big Plus 方法冻结）
+
+### 花费时间
+
+约 1 次方法设计 + 文档同步
+
+### 目标
+
+- 进入 Phase 6 第一步：先冻结 `TabICL` 支持集选择 Big Plus 方法
+- 不直接启动完整长实验
+- 不改变主线范围，不新增模型、不调参、不扩展到 regression 或 survival analysis
+
+### 实际完成内容
+
+- 阅读并对齐 Phase 5 收口、Big Plus 规划、报告/PPT 骨架和当前项目记忆卡
+- 新增 Phase 6 学习型文档：`notebooks/phase6_big_plus_adult.md`
+- 更新 `docs/big_plus_plan.md`，将 Big Plus 方法冻结为 `v1`
+- 同步更新：
+  - `docs/phase_plan.md`
+  - `docs/project_record.md`
+  - `docs/session_handoff.md`
+  - `docs/work_log.md`
+- 固定四种支持集策略：
+  - `Full Context`
+  - `Random Subset`
+  - `Balanced Random Subset`
+  - `Balanced Prototype Retrieval`
+- 明确 `Balanced Prototype Retrieval` 的算法细节：
+  - 检索空间只由训练 split 构造
+  - 数值特征使用训练 split median 填补并按训练 split mean/std 标准化
+  - 类别特征使用训练 split most frequent 填补并 one-hot
+  - 距离度量固定为欧氏距离
+  - 类内选择最接近类别中心的样本
+  - 类别配额先平衡，再按训练集类别规模比例补齐
+  - 类别样本不足时全部保留并重分配剩余预算
+  - 不使用测试标签、测试特征或测试分布
+  - 与随机 baseline 使用相同 budgets、seeds 和 train/test splits
+
+### 遇到的问题
+
+- `Full Context` 使用完整训练 split，和 `512/2048/8192` 预算策略不是完全预算公平比较
+- `Balanced Prototype Retrieval` 如果只选类别中心样本，可能忽略决策边界附近样本
+- one-hot 后的类别维度可能影响欧氏距离
+
+### 解决方式
+
+- 将 `Full Context` 明确写成 budget-independent reference
+- 将预算公平比较限定在 `Random Subset`、`Balanced Random Subset` 和 `Balanced Prototype Retrieval` 之间
+- 先冻结当前版本，不在实验中临时改成边界检索或距离加权
+- 将这些潜在问题写入 Phase 6 风险和后续结果解释口径
+
+### 学到的东西
+
+- Big Plus 的关键不是把方法写复杂，而是让每个对照回答一个清楚问题
+- `Balanced Random Subset` 很重要，因为它能区分“类别平衡收益”和“原型检索收益”
+- 方法冻结能保护后续实验解释，不会因为看了结果再改规则而失去可信度
+
+### 下一步
+
+- 实现 `src/phase6_big_plus_adult.py`
+- 先跑 `Adult + budget 512 + seed 42` smoke test
+- smoke test 通过后，再运行完整 Adult 主实验
+- 真实实验完成前，不更新 `docs/experiment_log.md` 为 Phase 6 结果
+
+---
+
+## 2026-04-26（Phase 6 脚本实现与 smoke test）
+
+### 花费时间
+
+约 1 次脚本实现 + smoke test + CSV 校验
+
+### 目标
+
+- 实现 `src/phase6_big_plus_adult.py`
+- 只做 `Adult + TabICL` 支持集选择实验脚本
+- 实现四种已冻结策略
+- 先跑 `budget=512, seed=42` smoke test，不启动完整长实验
+
+### 实际完成内容
+
+- 新增 `src/phase6_big_plus_adult.py`
+- 实现命令行参数：
+  - `--strategies`
+  - `--budgets`
+  - `--seeds`
+- 默认参数设为 smoke-test 友好：
+  - all four strategies
+  - `budget=512`
+  - `seed=42`
+- 实现四种支持集策略：
+  - `full_context`
+  - `random_subset`
+  - `balanced_random_subset`
+  - `balanced_prototype_retrieval`
+- 实现 frozen class quota 分配规则
+- 实现 train-only 检索空间：
+  - 数值列 median 填补 + 标准化
+  - 类别列 most frequent 填补 + one-hot
+  - 欧氏距离到类别中心
+- 复用 Phase 4 的：
+  - Adult 数据加载
+  - repeated stratified split
+  - TabICL checkpoint 预热
+  - TabICL fit/predict
+  - `accuracy`、`balanced_accuracy`、`macro_f1`
+- 运行语法检查：
+
+```bash
+python3 -m py_compile src/phase6_big_plus_adult.py
+```
+
+- 运行 smoke test：
+
+```bash
+python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42
+```
+
+### 输出文件
+
+- `results/phase6_big_plus_adult.csv`
+- `results/phase6_big_plus_adult_summary.csv`
+
+### Smoke test 校验
+
+- detail CSV：`4` 行
+- summary CSV：`4` 行
+- strategies：
+  - `full_context`
+  - `random_subset`
+  - `balanced_random_subset`
+  - `balanced_prototype_retrieval`
+- budgets：
+  - `512`
+  - `full`
+- seeds：
+  - `42`
+- `requested_budget` 无缺失
+- `actual_support_size` 无缺失
+- `support_class_counts` 无缺失
+
+### Smoke test 观察
+
+- `full_context` 使用完整训练 split：`actual_support_size = 39073`
+- 三种预算策略都使用 `requested_budget = 512` 且 `actual_support_size = 512`
+- `balanced_random_subset` 和 `balanced_prototype_retrieval` 都得到 `{"<=50K": 256, ">50K": 256}`
+- `random_subset` 得到 `{"<=50K": 410, ">50K": 102}`
+- `Full Context` 本次运行耗时明显较长，后续完整 Adult 主实验需要显式确认后再启动
+
+### 遇到的问题
+
+- 第一次 CSV 检查命令被 PowerShell/WSL 引号处理影响，检查命令本身失败
+- `cut` 读取 CSV 时会被 JSON 字符串中的逗号干扰
+
+### 解决方式
+
+- 改用 PowerShell `Import-Csv` 读取 WSL 路径下的 CSV 做字段完整性检查
+- 保留脚本输出本身，不因为检查命令失败重跑实验
+
+### 学到的东西
+
+- `support_class_counts` 这种字段最好用合法 JSON 字符串保存，但检查时要使用 CSV parser，而不是简单 `cut`
+- Full-context reference 的工程成本比预算受限策略高很多，后续完整实验需要主动控制节奏
+- Smoke test 的价值是验证实现和 schema，不是提前解释方法优劣
+
+### 下一步
+
+- 审查 `src/phase6_big_plus_adult.py` 的 quota 分配、BPR 检索空间和输出列
+- 确认后再运行完整 Adult 主实验
+- 完整实验完成前，不把 smoke test 写成 Big Plus 正式成功或失败
+
+---
+
+## 2026-04-27（Phase 6 结果整理与论文材料化）
+
+### 花费时间
+
+约 1 次文档整理 + 报告材料同步
+
+### 目标
+
+- 不启动任何新实验
+- 不启动 Phase 7
+- 不启动 Bank Marketing 次验证
+- 不重跑 Phase 4/5
+- 把已完成的 Phase 6 Adult 主实验整理成可以写进报告的材料
+
+### 实际完成内容
+
+- 阅读并对齐：
+  - `report/outline.md`
+  - `report/outline_zh.md`
+  - `docs/project_record.md`
+  - `docs/experiment_log.md`
+  - `docs/work_log.md`
+  - `docs/session_handoff.md`
+  - `notebooks/phase6_big_plus_adult.md`
+- 新增英文 Phase 6 结果材料：
+  - `report/phase6_big_plus_results.md`
+- 新增中文 Phase 6 结果材料：
+  - `report/phase6_big_plus_results_zh.md`
+- 更新英文报告 outline：
+  - 新增 `Big Plus Support-Set Selection Ablation`
+  - 把 Big Plus 从未来 preview 改为已完成的 Adult ablation
+  - 明确 BPR 是负结果，不是成功方法
+- 更新中文报告 outline：
+  - 新增 `Big Plus 支持集选择 Ablation`
+  - 写入图表引用、实验设置、结果解释和限制
+- 更新 `docs/project_record.md`：
+  - Phase 6 状态改为 Adult 主实验已完成并已材料化
+  - 下一步改为 Phase 6 论文整理，而不是启动 Phase 7
+- 更新 `docs/experiment_log.md`：
+  - 新增实验 013，记录 Phase 6 Adult 主实验、结果图表和结论
+- 更新 `docs/session_handoff.md`：
+  - 记录当前接手者应继续报告正文/caption/table，而不是启动 Phase 7
+
+### 遇到的问题
+
+- 多份文档仍停留在 “Phase 6 完整 Adult 主实验未运行 / 下一步启动长实验” 的旧口径。
+- 报告 outline 中 Big Plus 仍是 future preview，需要改成已完成的 ablation。
+
+### 解决方式
+
+- 统一改成当前真实状态：
+  - Adult 主实验已完成
+  - 图表已生成
+  - BPR 冻结版本未超过强随机 baseline
+  - Phase 6 是有价值的负结果
+- 保留方法冻结，不改算法、不改结果 CSV、不新增实验。
+
+### 学到的东西
+
+- 负结果也可以成为报告亮点，前提是对照组设计清楚。
+- `Balanced Random Subset` 是强 baseline；后续任何检索式支持集选择都需要先超过它。
+- 对项目交接最重要的是避免旧文档继续诱导下一步启动已完成的实验。
+
+### 下一步
+
+- 继续打磨 Phase 6 报告正文
+- 为 5 张 Phase 6 图写正式 caption
+- 准备可放进最终报告的英文结果段落和表格
+- 暂不启动 Phase 7
 
 ---
 

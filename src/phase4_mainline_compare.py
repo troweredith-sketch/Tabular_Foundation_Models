@@ -12,7 +12,7 @@ from lightgbm import LGBMClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.datasets import fetch_openml
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder
@@ -61,6 +61,8 @@ DETAIL_COLUMN_ORDER = [
     "model",
     "metric",
     "accuracy",
+    "balanced_accuracy",
+    "macro_f1",
     "fit_seconds",
     "predict_seconds",
     "total_seconds",
@@ -90,6 +92,14 @@ SUMMARY_COLUMN_ORDER = [
     "accuracy_std",
     "accuracy_min",
     "accuracy_max",
+    "balanced_accuracy_mean",
+    "balanced_accuracy_std",
+    "balanced_accuracy_min",
+    "balanced_accuracy_max",
+    "macro_f1_mean",
+    "macro_f1_std",
+    "macro_f1_min",
+    "macro_f1_max",
     "fit_seconds_median",
     "predict_seconds_median",
     "total_seconds_median",
@@ -180,6 +190,15 @@ def get_feature_groups(X: pd.DataFrame) -> tuple[list[str], list[str]]:
         exclude=["category", "object", "string", "bool", "boolean"],
     ).columns.tolist()
     return categorical_cols, numeric_cols
+
+
+def calculate_classification_metrics(y_true: object, y_pred: object) -> dict[str, object]:
+    return {
+        "metric": "accuracy",
+        "accuracy": round(accuracy_score(y_true, y_pred), 4),
+        "balanced_accuracy": round(balanced_accuracy_score(y_true, y_pred), 4),
+        "macro_f1": round(f1_score(y_true, y_pred, average="macro", zero_division=0), 4),
+    }
 
 
 def build_tree_preprocessor(
@@ -381,8 +400,7 @@ def run_lightgbm(
     return {
         "dataset": dataset_key,
         "model": MODEL_DISPLAY_NAMES["lightgbm"],
-        "metric": "accuracy",
-        "accuracy": round(accuracy_score(y_test, y_pred), 4),
+        **calculate_classification_metrics(y_test, y_pred),
         "fit_seconds": round(fit_seconds, 4),
         "predict_seconds": round(predict_seconds, 4),
         "total_seconds": round(fit_seconds + predict_seconds, 4),
@@ -423,8 +441,7 @@ def run_xgboost(
     return {
         "dataset": dataset_key,
         "model": MODEL_DISPLAY_NAMES["xgboost"],
-        "metric": "accuracy",
-        "accuracy": round(accuracy_score(y_test_encoded, y_pred_encoded), 4),
+        **calculate_classification_metrics(y_test_encoded, y_pred_encoded),
         "fit_seconds": round(fit_seconds, 4),
         "predict_seconds": round(predict_seconds, 4),
         "total_seconds": round(fit_seconds + predict_seconds, 4),
@@ -477,8 +494,7 @@ def run_tabpfn_v2(
     return {
         "dataset": dataset_key,
         "model": MODEL_DISPLAY_NAMES["tabpfn_v2"],
-        "metric": "accuracy",
-        "accuracy": round(accuracy_score(y_test, y_pred), 4),
+        **calculate_classification_metrics(y_test, y_pred),
         "fit_seconds": round(fit_seconds, 4),
         "predict_seconds": round(predict_seconds, 4),
         "total_seconds": round(fit_seconds + predict_seconds, 4),
@@ -520,8 +536,7 @@ def run_tabicl(
     return {
         "dataset": dataset_key,
         "model": MODEL_DISPLAY_NAMES["tabicl"],
-        "metric": "accuracy",
-        "accuracy": round(accuracy_score(y_test, y_pred), 4),
+        **calculate_classification_metrics(y_test, y_pred),
         "fit_seconds": round(fit_seconds, 4),
         "predict_seconds": round(predict_seconds, 4),
         "total_seconds": round(fit_seconds + predict_seconds, 4),
@@ -768,18 +783,36 @@ def build_summary(detail_df: pd.DataFrame) -> pd.DataFrame:
             accuracy_std=("accuracy", "std"),
             accuracy_min=("accuracy", "min"),
             accuracy_max=("accuracy", "max"),
+            balanced_accuracy_mean=("balanced_accuracy", "mean"),
+            balanced_accuracy_std=("balanced_accuracy", "std"),
+            balanced_accuracy_min=("balanced_accuracy", "min"),
+            balanced_accuracy_max=("balanced_accuracy", "max"),
+            macro_f1_mean=("macro_f1", "mean"),
+            macro_f1_std=("macro_f1", "std"),
+            macro_f1_min=("macro_f1", "min"),
+            macro_f1_max=("macro_f1", "max"),
             fit_seconds_median=("fit_seconds", "median"),
             predict_seconds_median=("predict_seconds", "median"),
             total_seconds_median=("total_seconds", "median"),
         )
     )
-    summary_df["accuracy_std"] = summary_df["accuracy_std"].fillna(0.0)
+    summary_df[["accuracy_std", "balanced_accuracy_std", "macro_f1_std"]] = summary_df[
+        ["accuracy_std", "balanced_accuracy_std", "macro_f1_std"]
+    ].fillna(0.0)
 
     numeric_columns = [
         "accuracy_mean",
         "accuracy_std",
         "accuracy_min",
         "accuracy_max",
+        "balanced_accuracy_mean",
+        "balanced_accuracy_std",
+        "balanced_accuracy_min",
+        "balanced_accuracy_max",
+        "macro_f1_mean",
+        "macro_f1_std",
+        "macro_f1_min",
+        "macro_f1_max",
         "fit_seconds_median",
         "predict_seconds_median",
         "total_seconds_median",
@@ -857,6 +890,8 @@ def main() -> None:
                             "seed": result["seed"],
                             "model": result["model"],
                             "accuracy": result["accuracy"],
+                            "balanced_accuracy": result["balanced_accuracy"],
+                            "macro_f1": result["macro_f1"],
                             "fit_seconds": result["fit_seconds"],
                             "predict_seconds": result["predict_seconds"],
                             "train_size": result["train_size"],
