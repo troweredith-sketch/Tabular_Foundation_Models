@@ -1,8 +1,8 @@
-> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+> Historical planning document, not the final submitted status. Final source of truth: use `report/report_draft.md`, `results/*.csv`, and `report/submission_manifest.md` for the submitted results. This file is retained for planning and work-log context only.
 
 # 项目阶段计划（硬要求优先版）
 
-这份文档是当前项目的主规划文档。
+这份文档是项目过程中的历史阶段计划。
 从 `2026-04-24` 起，项目路线从“主线比较 + 直接进入 Big Plus”调整为：
 
 1. 先补齐课程原始要求中的硬指标和分析闭环
@@ -40,7 +40,7 @@ Phase 4 单独还不能直接视为最终主线闭环，原因是：
 - 当前树模型是 fixed strong baselines，不是 tuned SOTA baselines
 - 当前数据集是 OpenML datasets，不能包装成 TALENT 或 TabArena 实验
 
-截至 2026-04-27，Phase 5 已补齐额外分类指标、完整 train-size scalability、主线图表、英文报告骨架和 15 分钟展示骨架。主线已经可以独立支撑课程报告。Phase 6 已完成 `TabICL` 支持集选择 Big Plus 方法冻结、Adult 主实验、结果图表和报告材料化。当前不启动 Phase 7，优先继续最终报告正文、caption、表格和展示材料整理。
+截至 2026-04-27，Phase 5 已补齐额外分类指标、完整 train-size scalability、主线图表、英文报告骨架和 15 分钟展示骨架。主线已经可以独立支撑课程报告。Phase 6 已完成 `TabICL` 支持集选择 Big Plus 方法冻结、Adult 主实验、结果图表和报告材料化。当前不启动 Phase 7；最终报告、图表和 submission manifest 已完成封装，`slides/` 中保留展示 outline drafts。
 
 ## 双轨原则
 
@@ -67,7 +67,7 @@ Phase 4 单独还不能直接视为最终主线闭环，原因是：
 | Phase 5 | 4月24日-4月28日 | 主线硬要求闭环与结果补强 | 已完成 |
 | Phase 6 | 4月28日-5月1日 | Big Plus 方法冻结、Adult 主实验与结果材料化 | 已完成 Adult 主实验和报告材料整理 |
 | Phase 7 | 5月1日-5月2日 | Big Plus 次验证与稳健性判断 | 未开始，当前不启动 |
-| Phase 8 | 5月2日-5月4日 | 报告、图表、PPT 和最终提交整理 | 未开始 |
+| Phase 8 | 5月2日-5月4日 | 报告、图表、PPT 和最终提交整理 | 最终报告、图表和 manifest 已封装；slides 保留 outline drafts |
 
 ## Phase 1：明确问题、学习基础概念、搭环境
 

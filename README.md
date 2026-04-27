@@ -66,8 +66,8 @@ Mainline findings:
 
 - On Adult, boosted-tree baselines remain strongest overall.
 - On Bank Marketing, foundation models are more competitive, especially TabICL on imbalance-aware metrics.
-- Tree models are much faster than the foundation models.
-- TabICL is substantially faster than TabPFN v2 in this local setup.
+- In the practical local mixed-device timing reported here, tree models are much faster than the foundation models.
+- In the same practical timing setup, TabICL is substantially faster than TabPFN v2.
 
 Phase 6 Big Plus finding:
 
@@ -104,6 +104,14 @@ Phase 6 Big Plus finding:
 - `results/phase6_big_plus_adult_summary.csv`
 - `results/missingness_robustness_adult.csv`
 - `results/missingness_robustness_adult_summary.csv`
+
+### Official vs Historical Artifacts
+
+| Artifact group | Files | Role |
+| --- | --- | --- |
+| Official report package | `report/final_report.pdf`, `report/report_draft.md`, `report/submission_manifest.md` | Source of truth for the submitted conclusions. |
+| Official result artifacts | Key CSV files listed above and figures in `results/figures/` | Frozen outputs used by the final report. |
+| Historical trace files | `results/first_result.csv`, `results/phase3_*`, `results/*backup.csv`, `docs/phase_plan.md`, notebooks | Retained for traceability; not the final result source of truth. |
 
 ### Main Figures
 
@@ -264,8 +272,8 @@ Phase 7 没有启动。
 
 - Adult 上 boosted-tree baseline 整体仍然最强。
 - Bank Marketing 上 foundation models 更有竞争力，尤其是 TabICL 在 imbalance-aware metrics 上表现更好。
-- 树模型比 foundation models 快得多。
-- 在本地设置中，TabICL 明显快于 TabPFN v2。
+- 在本文报告的实际本地 mixed-device timing 中，树模型比 foundation models 快得多。
+- 在同一 practical timing 口径下，TabICL 明显快于 TabPFN v2。
 
 Phase 6 Big Plus 发现：
 
@@ -302,6 +310,14 @@ Phase 6 Big Plus 发现：
 - `results/phase6_big_plus_adult_summary.csv`
 - `results/missingness_robustness_adult.csv`
 - `results/missingness_robustness_adult_summary.csv`
+
+### 正式产物与历史产物
+
+| 产物类型 | 文件 | 角色 |
+| --- | --- | --- |
+| 正式报告包 | `report/final_report.pdf`、`report/report_draft.md`、`report/submission_manifest.md` | 提交结论的 source of truth。 |
+| 正式结果产物 | 上方列出的关键 CSV，以及 `results/figures/` 中的图表 | 最终报告使用的冻结结果。 |
+| 历史追踪文件 | `results/first_result.csv`、`results/phase3_*`、`results/*backup.csv`、`docs/phase_plan.md`、notebooks | 保留用于追溯过程；不是最终结果 source of truth。 |
 
 ### 主要图表
 

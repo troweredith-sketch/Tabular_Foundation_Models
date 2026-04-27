@@ -276,6 +276,8 @@ Full-train TabPFN v2 results exceed the cleaner 10k support-range setting and sh
 
 The Phase 6 Big Plus ablation is Adult-only and uses three seeds. It should not be interpreted as proof that all retrieval-based support-set selection is ineffective. It only shows that the frozen balanced prototype retrieval rule did not beat strong random baselines in this setting.
 
+A planned secondary Phase 7 validation was not started and is left as future work. This avoids adding a late, under-validated experiment that could blur the frozen Phase 6 interpretation.
+
 ## Conclusion
 
 This project compares tabular foundation models and boosted-tree baselines on Adult and Bank Marketing. The mainline results show that boosted trees remain very strong, especially on Adult and runtime. Foundation models are more competitive on Bank Marketing, where TabICL has the strongest imbalance-aware metrics.

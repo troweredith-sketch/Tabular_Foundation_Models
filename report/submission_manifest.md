@@ -48,6 +48,14 @@ PDF versions of the generated figures are also present in `results/figures/`.
 - Supplemental Adult missingness robustness raw results: `results/missingness_robustness_adult.csv`
 - Supplemental Adult missingness robustness summary results: `results/missingness_robustness_adult_summary.csv`
 
+## Historical / Non-Final Artifacts
+
+The official result source of truth is the report package, the key CSV files listed above, and the generated figures in `results/figures/`.
+
+The repository also keeps earlier trace artifacts such as `results/first_result.csv`, `results/phase3_*`, and `results/*backup.csv`. These files document the project path and review history, but they are not the final benchmark outputs used for the submitted conclusions.
+
+Planning documents and notebooks, including `docs/phase_plan.md` and `notebooks/`, are retained as historical context. They should not override the final report, committed key CSV files, or this manifest.
+
 ## Experiment Scope Covered
 
 - Mainline comparison of LightGBM, XGBoost, TabPFN v2, and TabICL on Adult and Bank Marketing.
