@@ -6,6 +6,7 @@ import argparse
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import torch
 from lightgbm import LGBMClassifier
@@ -23,7 +24,6 @@ from xgboost import XGBClassifier
 
 TEST_SIZE = 0.2
 CONTROL_TRAIN_SIZE = 10_000
-CONTROL_TRAIN_SIZE_FALLBACK = 9_500
 DEFAULT_SEEDS = [42, 43, 44, 45, 46]
 DEFAULT_DATASETS = ["adult", "bank_marketing"]
 DEFAULT_MODELS = ["lightgbm", "xgboost", "tabpfn_v2", "tabicl"]
@@ -33,6 +33,20 @@ FULL_SCENARIO = "full_train_reference"
 DETAIL_OUTPUT_FILENAME = "phase4_mainline_compare.csv"
 SUMMARY_OUTPUT_FILENAME = "phase4_mainline_compare_summary.csv"
 TABICL_CHECKPOINT_VERSION = "tabicl-classifier-v2-20260212.ckpt"
+COMMON_MISSING_TOKENS = {
+    "",
+    "?",
+    "NA",
+    "N/A",
+    "NULL",
+    "NaN",
+    "None",
+    "na",
+    "n/a",
+    "nan",
+    "none",
+    "null",
+}
 MODEL_DISPLAY_NAMES = {
     "lightgbm": "LightGBM",
     "xgboost": "XGBoost",
@@ -168,11 +182,13 @@ def load_dataset(project_root: Path, dataset_key: str) -> tuple[pd.DataFrame, pd
         dataset_df = pd.read_csv(cache_path)
         X = dataset_df.drop(columns=[target_col]).copy()
         y = dataset_df[target_col].copy()
+        X = normalize_missing_tokens(X)
         return X, y, cache_path
 
     dataset = fetch_openml(name=config["openml_name"], version=config["version"], as_frame=True)
     X = dataset.data.copy()
     y = dataset.target.copy()
+    X = normalize_missing_tokens(X)
 
     dataset_df = X.copy()
     dataset_df[target_col] = y
@@ -180,6 +196,21 @@ def load_dataset(project_root: Path, dataset_key: str) -> tuple[pd.DataFrame, pd
     dataset_df.to_csv(cache_path, index=False)
 
     return X, y, cache_path
+
+
+def normalize_missing_tokens(X: pd.DataFrame) -> pd.DataFrame:
+    """Normalize common string missing tokens without treating 'unknown' as missing."""
+    X = X.copy()
+    text_columns = X.select_dtypes(
+        include=["category", "object", "string", "bool", "boolean"],
+    ).columns
+
+    for column in text_columns:
+        values = X[column].astype("object")
+        stripped = values.map(lambda value: value.strip() if isinstance(value, str) else value)
+        X[column] = stripped.mask(stripped.isin(COMMON_MISSING_TOKENS), np.nan)
+
+    return X
 
 
 def get_feature_groups(X: pd.DataFrame) -> tuple[list[str], list[str]]:
@@ -195,9 +226,9 @@ def get_feature_groups(X: pd.DataFrame) -> tuple[list[str], list[str]]:
 def calculate_classification_metrics(y_true: object, y_pred: object) -> dict[str, object]:
     return {
         "metric": "accuracy",
-        "accuracy": round(accuracy_score(y_true, y_pred), 4),
-        "balanced_accuracy": round(balanced_accuracy_score(y_true, y_pred), 4),
-        "macro_f1": round(f1_score(y_true, y_pred, average="macro", zero_division=0), 4),
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
+        "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
     }
 
 
@@ -578,7 +609,6 @@ def build_notes(
     model_key: str,
     *,
     actual_train_size: int,
-    fallback_message: str,
 ) -> str:
     if scenario == FULL_SCENARIO:
         if model_key == "tabpfn_v2":
@@ -607,12 +637,6 @@ def build_notes(
     else:
         base_notes = "Fixed test set + seed-specific 10k train subset in the unified Phase 4 mainline table."
 
-    if fallback_message:
-        return (
-            f"{base_notes} Requested train_size={CONTROL_TRAIN_SIZE} triggered TabPFN fallback: "
-            f"{fallback_message} Fallback train_size={CONTROL_TRAIN_SIZE_FALLBACK} was used for all models."
-        )
-
     if actual_train_size != CONTROL_TRAIN_SIZE:
         return f"{base_notes} Effective train_size={actual_train_size} was used for this run."
 
@@ -632,7 +656,6 @@ def run_models_for_configuration(
     scenario: str,
     seed: int,
     actual_train_size: int,
-    fallback_message: str,
 ) -> list[dict[str, object]]:
     results: list[dict[str, object]] = []
 
@@ -641,7 +664,6 @@ def run_models_for_configuration(
             scenario,
             model_key,
             actual_train_size=actual_train_size,
-            fallback_message=fallback_message,
         )
 
         if model_key == "lightgbm":
@@ -719,7 +741,6 @@ def run_single_dataset_scenario_seed(
         stratify=y,
     )
 
-    fallback_message = ""
     actual_train_size = len(X_train_full)
 
     if scenario == CONTROL_SCENARIO:
@@ -762,7 +783,6 @@ def run_single_dataset_scenario_seed(
         scenario=scenario,
         seed=seed,
         actual_train_size=actual_train_size,
-        fallback_message=fallback_message,
     )
 
     return [{**common_fields, **result} for result in model_results]

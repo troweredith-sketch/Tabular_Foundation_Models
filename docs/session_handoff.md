@@ -30,7 +30,8 @@
 - Phase 4 已完成：完成 `Adult + Bank Marketing`、四模型、双场景、五 seeds 的主线比较
 - Phase 5 已完成：已补齐主线 `balanced_accuracy`、`macro_f1`、完整 train-size scalability、主线图表、英文报告骨架和 15 分钟 PPT 骨架
 - Phase 6 已完成：`TabICL` 支持集选择 Big Plus 方法冻结、Adult 主实验、图表和报告材料化
-- Phase 6 脚本已实现，smoke test 和完整 Adult 主实验均已完成
+- Phase 6 脚本已实现，smoke test 和完整 Adult 主实验均已完成；review 修复后默认 `--preset smoke` 写入 `results/smoke/`，正式复现需 `--preset final`
+- 已新增 Adult missingness robustness sanity check，覆盖 train size 2048、seed 42、missing rates 0/0.1/0.3
 - Phase 7 未开始，当前不建议启动；下一步应继续报告正文、caption、表格和展示材料整理
 
 ## 已有核心结果
@@ -68,9 +69,9 @@
   - 不使用测试标签、测试特征或测试分布
   - 预算固定为 `512`、`2048`、`8192`，seeds 固定为 `42`、`43`、`44`
 - Phase 6 smoke test：
-  - 命令：`python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42`
-  - 已生成 `results/phase6_big_plus_adult.csv` 和 `results/phase6_big_plus_adult_summary.csv`
-  - smoke test 只作为历史工程记录，不作为正式结论
+  - 当前命令：`python3 src/phase6_big_plus_adult.py --preset smoke --budgets 512 --seeds 42`
+  - 当前默认输出：`results/smoke/phase6_big_plus_adult.csv` 和 `results/smoke/phase6_big_plus_adult_summary.csv`
+  - 早期 smoke test 曾写入正式结果路径；这个误覆盖风险已通过 smoke/final preset 修复
 - Phase 6 Adult 主实验：
   - detail CSV：`results/phase6_big_plus_adult.csv`，共 `30` 行
   - summary CSV：`results/phase6_big_plus_adult_summary.csv`，共 `10` 行
@@ -95,6 +96,10 @@
   - `Random Subset` 在 accuracy 和 macro-F1 上更稳
   - `Full Context` 效果最好但 runtime 明显更高
   - 这是有价值的负结果，不要为了追分修改冻结方法
+- Supplemental missingness robustness：
+  - detail CSV：`results/missingness_robustness_adult.csv`
+  - summary CSV：`results/missingness_robustness_adult_summary.csv`
+  - 结论口径：四个模型在注入缺失下都会退化；单 seed 小实验中 TabICL 在 30% 缺失下 drop 较小，但这只是 sanity check，不是系统鲁棒性 benchmark
 
 ## 当前必须保留的口径
 
@@ -102,10 +107,12 @@
 - 主线目前已经可以独立支撑课程报告
 - 当前多 seed 实验应表述为 repeated stratified splits：每个 seed 内模型共享同一 split，跨 seeds 不是同一个固定测试集
 - 当前 runtime 是 practical mixed-device timing，树模型在 CPU，foundation models 可能在 GPU
+- Phase 6 runtime 表应表述为支持集构造完成后的 TabICL fit+predict 模型侧时间，不包含 support-set selection overhead
 - 当前树模型是 fixed strong baselines，不是 tuned SOTA baselines
 - 当前 `Adult` 和 `Bank Marketing` 是 OpenML datasets，不能包装成 TALENT 或 TabArena 实验
 - Phase 6 Adult 主实验已经完成，但不要把 Big Plus 写成成功方法
 - Phase 6 smoke test 只是历史工程记录；正式结论以 30 行 Adult 主实验为准
+- Missingness robustness 只是一组补充 sanity check，不能包装成完整 robustness benchmark
 - 当前冻结版 `Balanced Prototype Retrieval` 未超过强随机 baseline，应写成负结果 ablation
 - `Full Context` 是完整训练 split reference，不是和 `512/2048/8192` 完全预算公平的 baseline
 

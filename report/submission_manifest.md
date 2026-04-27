@@ -45,19 +45,21 @@ PDF versions of the generated figures are also present in `results/figures/`.
 - Phase 5 scalability summary results: `results/phase5_scalability_compare_summary.csv`
 - Phase 6 Big Plus Adult raw results: `results/phase6_big_plus_adult.csv`
 - Phase 6 Big Plus Adult summary results: `results/phase6_big_plus_adult_summary.csv`
+- Supplemental Adult missingness robustness raw results: `results/missingness_robustness_adult.csv`
+- Supplemental Adult missingness robustness summary results: `results/missingness_robustness_adult_summary.csv`
 
 ## Experiment Scope Covered
 
 - Mainline comparison of LightGBM, XGBoost, TabPFN v2, and TabICL on Adult and Bank Marketing.
 - Phase 5 train-size scalability analysis over 512, 2048, 8192, 10000, and full train sizes.
 - Phase 6 Big Plus negative ablation on TabICL support-set selection for Adult.
+- Supplemental Adult missingness robustness sanity check at train size 2048 and seed 42.
 
 The Phase 6 result should be presented as a negative ablation: budget-limited support sets reduce runtime, but the frozen Balanced Prototype Retrieval rule does not outperform Random Subset or Balanced Random Subset.
 
-## Explicitly Not Done During Final Packaging
+## Explicitly Not Done / Caveats
 
 - Phase 7 was not started.
-- No experiments were rerun.
-- No result CSV files were modified.
-- The frozen Phase 6 method definition was not modified.
-- No experiment logic in `src/` was changed.
+- The frozen Phase 6 method definition was not changed, but `src/phase6_big_plus_adult.py` now has a safer `--preset smoke|final` interface and records selection/end-to-end timing for new runs.
+- The supplemental missingness check is a small sanity check, not a full robustness benchmark.
+- The Phase 6 summary table in the report uses model-side TabICL fit+predict runtime after support-set construction; it does not include support-selection overhead from the original Phase 6 result CSV.

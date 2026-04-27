@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,8 @@ DEFAULT_STRATEGIES = [
 ]
 DEFAULT_BUDGETS = [512]
 DEFAULT_SEEDS = [42]
+FINAL_BUDGETS = [512, 2048, 8192]
+FINAL_SEEDS = [42, 43, 44]
 DETAIL_OUTPUT_FILENAME = "phase6_big_plus_adult.csv"
 SUMMARY_OUTPUT_FILENAME = "phase6_big_plus_adult_summary.csv"
 STRATEGY_DISPLAY_NAMES = {
@@ -59,6 +62,8 @@ DETAIL_COLUMN_ORDER = [
     "fit_seconds",
     "predict_seconds",
     "total_seconds",
+    "selection_seconds",
+    "end_to_end_seconds",
     "device",
     "full_train_size",
     "test_size",
@@ -106,6 +111,8 @@ SUMMARY_COLUMN_ORDER = [
     "fit_seconds_median",
     "predict_seconds_median",
     "total_seconds_median",
+    "selection_seconds_median",
+    "end_to_end_seconds_median",
 ]
 
 
@@ -113,7 +120,17 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Run Phase 6 Adult-only TabICL support-set selection experiments. "
-            "Default arguments run the smoke test: all strategies, budget 512, seed 42."
+            "Default arguments run the smoke preset: all strategies, budget 512, seed 42, "
+            "saved under results/smoke/."
+        ),
+    )
+    parser.add_argument(
+        "--preset",
+        choices=["smoke", "final"],
+        default="smoke",
+        help=(
+            "Preset for default budgets, seeds, and output directory. "
+            "Use --preset final to reproduce the committed Phase 6 result files."
         ),
     )
     parser.add_argument(
@@ -127,15 +144,30 @@ def parse_args() -> argparse.Namespace:
         "--budgets",
         nargs="+",
         type=int,
-        default=DEFAULT_BUDGETS,
-        help="Support-set budgets for budget-limited strategies. Default: 512.",
+        default=None,
+        help=(
+            "Support-set budgets for budget-limited strategies. "
+            "Default: 512 for smoke, 512 2048 8192 for final."
+        ),
     )
     parser.add_argument(
         "--seeds",
         nargs="+",
         type=int,
-        default=DEFAULT_SEEDS,
-        help="Random seeds used for repeated stratified splits. Default: 42.",
+        default=None,
+        help=(
+            "Random seeds used for repeated stratified splits. "
+            "Default: 42 for smoke, 42 43 44 for final."
+        ),
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Directory for CSV outputs. Relative paths are resolved from project root. "
+            "Default: results/smoke for smoke, results for final."
+        ),
     )
     return parser.parse_args()
 
@@ -154,6 +186,29 @@ def normalize_budgets(values: list[int]) -> list[int]:
     if invalid:
         raise ValueError(f"Budgets must be positive integers, got: {invalid}.")
     return budgets
+
+
+def resolve_preset_defaults(args: argparse.Namespace) -> tuple[list[int], list[int], Path]:
+    budgets = args.budgets
+    seeds = args.seeds
+    output_dir = args.output_dir
+
+    if args.preset == "final":
+        if budgets is None:
+            budgets = FINAL_BUDGETS
+        if seeds is None:
+            seeds = FINAL_SEEDS
+        if output_dir is None:
+            output_dir = Path("results")
+    else:
+        if budgets is None:
+            budgets = DEFAULT_BUDGETS
+        if seeds is None:
+            seeds = DEFAULT_SEEDS
+        if output_dir is None:
+            output_dir = Path("results") / "smoke"
+
+    return normalize_budgets(budgets), sorted(set(seeds)), output_dir
 
 
 def class_counts_json(y: pd.Series) -> str:
@@ -417,6 +472,7 @@ def run_strategy(
     *,
     seed: int,
 ) -> dict[str, object]:
+    selection_start = time.perf_counter()
     (
         X_support,
         y_support,
@@ -433,6 +489,7 @@ def run_strategy(
         categorical_cols,
         seed=seed,
     )
+    selection_seconds = time.perf_counter() - selection_start
 
     notes = build_notes(strategy, budget_label, actual_support_size)
     result = phase4.run_tabicl(
@@ -454,6 +511,8 @@ def run_strategy(
         "support_class_counts": class_counts_json(y_support),
         "retrieval_n_features_after_encoding": retrieval_feature_count,
         "selection_method": strategy,
+        "selection_seconds": round(selection_seconds, 4),
+        "end_to_end_seconds": round(selection_seconds + float(result["total_seconds"]), 4),
         **result,
     }
 
@@ -561,6 +620,8 @@ def build_summary(detail_df: pd.DataFrame) -> pd.DataFrame:
             fit_seconds_median=("fit_seconds", "median"),
             predict_seconds_median=("predict_seconds", "median"),
             total_seconds_median=("total_seconds", "median"),
+            selection_seconds_median=("selection_seconds", "median"),
+            end_to_end_seconds_median=("end_to_end_seconds", "median"),
         )
     )
     summary_df[["accuracy_std", "balanced_accuracy_std", "macro_f1_std"]] = summary_df[
@@ -583,6 +644,8 @@ def build_summary(detail_df: pd.DataFrame) -> pd.DataFrame:
         "fit_seconds_median",
         "predict_seconds_median",
         "total_seconds_median",
+        "selection_seconds_median",
+        "end_to_end_seconds_median",
     ]
     for column in numeric_columns:
         summary_df[column] = summary_df[column].round(4)
@@ -590,18 +653,32 @@ def build_summary(detail_df: pd.DataFrame) -> pd.DataFrame:
     return summary_df[SUMMARY_COLUMN_ORDER]
 
 
-def save_outputs(project_root: Path, detail_records: list[dict[str, object]]) -> tuple[Path, Path]:
+def resolve_output_dir(project_root: Path, output_dir: Path) -> Path:
+    if output_dir.is_absolute():
+        resolved = output_dir
+    else:
+        resolved = project_root / output_dir
+    resolved.mkdir(parents=True, exist_ok=True)
+    return resolved
+
+
+def save_outputs(
+    project_root: Path,
+    detail_records: list[dict[str, object]],
+    output_dir: Path,
+) -> tuple[Path, Path]:
     detail_df = pd.DataFrame(detail_records)
     if detail_df.empty:
         detail_df = pd.DataFrame(columns=DETAIL_COLUMN_ORDER)
     else:
         detail_df = detail_df[DETAIL_COLUMN_ORDER]
 
-    detail_path = project_root / "results" / DETAIL_OUTPUT_FILENAME
+    resolved_output_dir = resolve_output_dir(project_root, output_dir)
+    detail_path = resolved_output_dir / DETAIL_OUTPUT_FILENAME
     detail_df.to_csv(detail_path, index=False)
 
     summary_df = build_summary(detail_df)
-    summary_path = project_root / "results" / SUMMARY_OUTPUT_FILENAME
+    summary_path = resolved_output_dir / SUMMARY_OUTPUT_FILENAME
     summary_df.to_csv(summary_path, index=False)
     return detail_path, summary_path
 
@@ -621,6 +698,8 @@ def print_run_result(result: dict[str, object]) -> None:
             "macro_f1": result["macro_f1"],
             "fit_seconds": result["fit_seconds"],
             "predict_seconds": result["predict_seconds"],
+            "selection_seconds": result["selection_seconds"],
+            "end_to_end_seconds": result["end_to_end_seconds"],
             "device": result["device"],
         }
     )
@@ -630,7 +709,7 @@ def main() -> None:
     args = parse_args()
     project_root = phase4.resolve_project_root()
     strategies = normalize_strategies(args.strategies)
-    budgets = normalize_budgets(args.budgets)
+    budgets, seeds, output_dir = resolve_preset_defaults(args)
 
     checkpoint_path = phase4.ensure_tabicl_checkpoint_available()
     print(f"TabICL checkpoint ready: {checkpoint_path}")
@@ -645,11 +724,13 @@ def main() -> None:
     print(f"Categorical features: {len(categorical_cols)}, numeric features: {len(numeric_cols)}")
     print(f"Strategies: {', '.join(strategies)}")
     print(f"Budgets: {', '.join(str(budget) for budget in budgets)}")
-    print(f"Seeds: {', '.join(str(seed) for seed in args.seeds)}")
+    print(f"Seeds: {', '.join(str(seed) for seed in seeds)}")
+    print(f"Preset: {args.preset}")
+    print(f"Output directory: {resolve_output_dir(project_root, output_dir)}")
     print()
 
     detail_records: list[dict[str, object]] = []
-    for seed in args.seeds:
+    for seed in seeds:
         print(f"[adult | phase6_support_selection] Running seed {seed}")
         run_results = run_seed(
             X,
@@ -666,12 +747,12 @@ def main() -> None:
         for result in run_results:
             print_run_result(result)
 
-        detail_path, summary_path = save_outputs(project_root, detail_records)
+        detail_path, summary_path = save_outputs(project_root, detail_records, output_dir)
         print(f"Intermediate detail saved to: {detail_path}")
         print(f"Intermediate summary saved to: {summary_path}")
         print()
 
-    detail_path, summary_path = save_outputs(project_root, detail_records)
+    detail_path, summary_path = save_outputs(project_root, detail_records, output_dir)
     print(f"Saved detail results to: {detail_path}")
     print(f"Saved summary results to: {summary_path}")
     print()

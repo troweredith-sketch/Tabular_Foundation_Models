@@ -102,6 +102,8 @@ Phase 6 Big Plus finding:
 - `results/phase5_scalability_compare_summary.csv`
 - `results/phase6_big_plus_adult.csv`
 - `results/phase6_big_plus_adult_summary.csv`
+- `results/missingness_robustness_adult.csv`
+- `results/missingness_robustness_adult_summary.csv`
 
 ### Main Figures
 
@@ -122,6 +124,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-basic.txt
 ```
+
+The key package versions used for the submitted experiments are recorded in
+`requirements-lock.txt`.
 
 Some foundation-model runs may require additional packages and CUDA support, depending on the local machine.
 
@@ -146,8 +151,17 @@ python3 src/phase5_make_mainline_figures.py
 Phase 6 Big Plus Adult experiment:
 
 ```bash
-python3 src/phase6_big_plus_adult.py
+python3 src/phase6_big_plus_adult.py --preset final
 python3 src/phase6_make_big_plus_figures.py
+```
+
+The default `phase6_big_plus_adult.py` command now runs a smoke preset and writes to
+`results/smoke/`; use `--preset final` to reproduce the final Phase 6 CSV files.
+
+Supplemental Adult missingness robustness check:
+
+```bash
+python3 src/missingness_robustness_adult.py --train-size 2048 --seeds 42 --missing-rates 0 0.1 0.3
 ```
 
 These commands can be expensive. They are not needed just to inspect the final report.
@@ -163,7 +177,7 @@ For project context, read:
 5. `docs/big_plus_plan.md`
 6. `notebooks/phase6_big_plus_adult.md`
 
-The handoff notes explicitly record that Phase 7 was not started, final packaging did not rerun experiments, and the Phase 6 frozen method definition was not modified during report finalization.
+The handoff notes explicitly record that Phase 7 was not started and that the Phase 6 frozen method definition was preserved. Later review fixes added a supplemental Adult missingness check and safer Phase 6 smoke/final presets.
 
 [Back to top](#tabular-foundation-models) | [Switch to 中文](#zh)
 
@@ -269,6 +283,8 @@ Phase 6 Big Plus 发现：
 - `results/phase5_scalability_compare_summary.csv`
 - `results/phase6_big_plus_adult.csv`
 - `results/phase6_big_plus_adult_summary.csv`
+- `results/missingness_robustness_adult.csv`
+- `results/missingness_robustness_adult_summary.csv`
 
 ### 主要图表
 
@@ -289,6 +305,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-basic.txt
 ```
+
+提交实验使用的关键包版本记录在 `requirements-lock.txt`。
 
 部分 foundation-model 实验可能还需要额外依赖和 CUDA 支持，取决于本地机器环境。
 
@@ -313,8 +331,17 @@ python3 src/phase5_make_mainline_figures.py
 Phase 6 Big Plus Adult 实验：
 
 ```bash
-python3 src/phase6_big_plus_adult.py
+python3 src/phase6_big_plus_adult.py --preset final
 python3 src/phase6_make_big_plus_figures.py
+```
+
+`phase6_big_plus_adult.py` 的默认无参数命令现在只运行 smoke preset，并写入
+`results/smoke/`；要复现最终 Phase 6 CSV，请显式使用 `--preset final`。
+
+补充 Adult missingness robustness 检查：
+
+```bash
+python3 src/missingness_robustness_adult.py --train-size 2048 --seeds 42 --missing-rates 0 0.1 0.3
 ```
 
 这些命令可能比较耗时。仅查看最终报告不需要重新运行实验。
@@ -330,6 +357,6 @@ python3 src/phase6_make_big_plus_figures.py
 5. `docs/big_plus_plan.md`
 6. `notebooks/phase6_big_plus_adult.md`
 
-Handoff 文档明确记录：Phase 7 没有启动；最终打包阶段没有重跑实验；报告定稿时没有修改 Phase 6 冻结方法定义。
+Handoff 文档明确记录：Phase 7 没有启动，并且 Phase 6 冻结方法定义保持不变。后续 review 修复增加了补充 Adult missingness 检查，以及更安全的 Phase 6 smoke/final presets。
 
 [回到顶部](#tabular-foundation-models) | [切换到 English](#english)

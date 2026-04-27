@@ -14,7 +14,7 @@ This is an ablation on the Adult dataset only. It should not be presented as a n
 - Split protocol: repeated stratified splits; all strategies share the same split within each seed.
 - Budget-limited support sizes: `512`, `2048`, `8192`.
 - Reference support size: `Full Context`, using the full seed-specific training split of `39073` examples.
-- Metrics: accuracy, balanced accuracy, macro-F1, and total runtime.
+- Metrics: accuracy, balanced accuracy, macro-F1, and TabICL fit+predict runtime after support-set construction.
 
 Strategies:
 
@@ -25,7 +25,7 @@ Strategies:
 
 ## Result Summary
 
-| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median Runtime (s) |
+| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median TabICL Fit+Predict Seconds |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Full Context | full | 0.8722 | 0.7919 | 0.8117 | 45.8005 |
 | Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.4771 |
@@ -48,7 +48,7 @@ The strongest budget-limited behavior is split by metric:
 - `Balanced Random Subset` is strongest for balanced accuracy.
 - `Balanced Prototype Retrieval` is not competitive under the frozen class-center prototype definition.
 
-The runtime result is still useful: budget-limited support sets reduce median total runtime from `45.8005s` for `Full Context` to roughly `2.5s` to `4.8s`. This supports the broader claim that support-set compression can make `TabICL` more practical, even though this specific retrieval rule did not improve predictive metrics.
+The runtime result is still useful, but it is model-side timing: the column measures TabICL fit+predict time after support-set construction and does not include BPR preprocessing, class-center computation, or distance ranking. Under that definition, budget-limited support sets reduce median runtime from `45.8005s` for `Full Context` to roughly `2.5s` to `4.8s`. This supports the narrower claim that support-set compression can make TabICL model execution more practical, even though this specific retrieval rule did not improve predictive metrics.
 
 ## Figure References
 

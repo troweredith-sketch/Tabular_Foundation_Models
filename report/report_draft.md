@@ -4,7 +4,7 @@
 
 This project compares two tabular foundation models, TabPFN v2 and TabICL, with two strong boosted-tree baselines, LightGBM and XGBoost, on two OpenML classification datasets: Adult and Bank Marketing. The evaluation uses repeated stratified splits and reports accuracy, balanced accuracy, macro-F1, and practical runtime. The mainline results show that boosted-tree baselines remain strongest on Adult, while foundation models, especially TabICL, are more competitive on Bank Marketing. Runtime results reveal a large practical cost gap: tree models are much faster, TabICL is substantially faster than TabPFN v2, and foundation-model runtime grows with train size.
 
-As a Big Plus extension, the project also studies TabICL support-set selection on Adult. Three budget-limited support-set strategies are compared with a full-context reference. The frozen balanced prototype retrieval strategy does not outperform random subset or balanced random subset, but budget-limited support sets substantially reduce runtime. The Big Plus result is therefore best interpreted as a useful negative ablation: support-set compression is practically useful, but the current class-center prototype retrieval rule is not a performance-improving method.
+As a Big Plus extension, the project also studies TabICL support-set selection on Adult. Three budget-limited support-set strategies are compared with a full-context reference. The frozen balanced prototype retrieval strategy does not outperform random subset or balanced random subset, but budget-limited support sets substantially reduce TabICL fit+predict runtime. The Big Plus result is therefore best interpreted as a useful negative ablation: support-set compression is practically useful, but the current class-center prototype retrieval rule is not a performance-improving method.
 
 ## Introduction
 
@@ -36,9 +36,9 @@ This project does not use TALENT, TabArena, or any other external tabular benchm
 
 The project uses two OpenML classification datasets.
 
-Adult is a binary income classification dataset with 48,842 samples, 14 raw features, 6 numeric features, and 8 categorical features. It mixes numeric and categorical columns and includes missing values. In the main results, Adult tends to favor boosted-tree baselines, although TabICL is close to the strongest tree models.
+Adult is a binary income classification dataset with 48,842 samples, 14 raw features, 6 numeric features, and 8 categorical features. It mixes numeric and categorical columns and includes missing values. The data loader normalizes common string missing tokens such as `?`, `NA`, and `null` to missing values before model-specific preprocessing. In the main results, Adult tends to favor boosted-tree baselines, although TabICL is close to the strongest tree models.
 
-Bank Marketing is a binary classification dataset with stronger class imbalance. It tests whether balanced accuracy and macro-F1 tell a different story from accuracy. In the main results, foundation models are more competitive on this dataset, and TabICL has the strongest imbalance-aware metrics.
+Bank Marketing is a binary classification dataset with stronger class imbalance. It tests whether balanced accuracy and macro-F1 tell a different story from accuracy. Its `unknown` category values are kept as observed category levels rather than normalized as missing values. In the main results, foundation models are more competitive on this dataset, and TabICL has the strongest imbalance-aware metrics.
 
 The experiments use repeated stratified splits. Within each seed, all models share the same train/test split. Across seeds, the test set changes; the results are repeated splits rather than one single fixed test set reused for every seed. The mainline uses seeds 42, 43, 44, 45, and 46. The Phase 6 Big Plus Adult experiment uses seeds 42, 43, and 44.
 
@@ -71,6 +71,8 @@ The metrics are:
 Runtime values are practical mixed-device timings. Tree models run on CPU, while foundation models may use CUDA. Runtime should therefore be interpreted as practical local cost rather than as a strict same-device hardware benchmark.
 
 LightGBM and XGBoost are fixed strong baselines. They are not tuned state-of-the-art baselines. This choice keeps the project focused on a controlled course-project comparison rather than hyperparameter search.
+
+As a supplemental robustness check, the project also runs an Adult-only missingness stress test at train size 2048 and seed 42. It injects deterministic cell-level missing values into feature columns at rates 0%, 10%, and 30%, while keeping the target labels unchanged and using the same masked split for all four models. This check is intentionally small and should not be interpreted as a full missing-value or categorical-cardinality robustness benchmark.
 
 ## Main Results
 
@@ -109,15 +111,15 @@ The scalability analysis studies how metrics change as the training size increas
 
 ![Figure 1. Train size vs accuracy.](../results/figures/phase5_scalability_accuracy.png)
 
-**Figure 1. Train size vs accuracy.** Mean accuracy over seeds 42 to 46 for Adult and Bank Marketing. Larger training sets generally improve accuracy, with tree baselines remaining strongest on Adult and TabICL becoming more competitive on Bank Marketing.
+**Figure 1. Train size vs accuracy.** Mean accuracy over seeds 42 to 46 for Adult and Bank Marketing. Larger training sets generally improve accuracy, with tree baselines remaining strongest on Adult and TabICL becoming more competitive on Bank Marketing. Error bars are omitted in the plot; standard deviations are available in the summary CSV.
 
 ![Figure 2. Train size vs balanced accuracy.](../results/figures/phase5_scalability_balanced_accuracy.png)
 
-**Figure 2. Train size vs balanced accuracy.** Mean balanced accuracy over seeds 42 to 46. This metric highlights minority-class behavior, especially on Bank Marketing, where TabICL benefits more clearly from larger train sizes than accuracy alone suggests.
+**Figure 2. Train size vs balanced accuracy.** Mean balanced accuracy over seeds 42 to 46. This metric highlights minority-class behavior, especially on Bank Marketing, where TabICL benefits more clearly from larger train sizes than accuracy alone suggests. Error bars are omitted in the plot; standard deviations are available in the summary CSV.
 
 ![Figure 3. Train size vs macro-F1.](../results/figures/phase5_scalability_macro_f1.png)
 
-**Figure 3. Train size vs macro-F1.** Mean macro-F1 over seeds 42 to 46. Macro-F1 confirms the dataset-dependent pattern: Adult remains favorable to boosted trees, while Bank Marketing gives TabICL the strongest full-train imbalance-aware result.
+**Figure 3. Train size vs macro-F1.** Mean macro-F1 over seeds 42 to 46. Macro-F1 confirms the dataset-dependent pattern: Adult remains favorable to boosted trees, while Bank Marketing gives TabICL the strongest full-train imbalance-aware result. Error bars are omitted in the plot; standard deviations are available in the summary CSV.
 
 On Adult, larger train sizes generally improve all models, but tree models benefit more clearly. LightGBM macro-F1 rises from 0.7513 at 512 examples to 0.8183 at full training size. TabICL also improves and remains close to the strongest baselines, but it does not overtake them. TabPFN v2 improves less on Adult and remains below the strongest models.
 
@@ -151,6 +153,8 @@ The endpoint view supports two conclusions. First, additional training data usua
 ## Runtime Analysis
 
 Runtime is a central practical tradeoff in this project. Figure 4 summarizes median total runtime over the train-size grid.
+
+Table 1 and the scalability analysis are generated from separate experiment outputs. Predictive metrics are directly comparable across the shared split protocol, while runtime medians should be read as practical local timings that can vary across reruns, especially for GPU-backed foundation-model runs.
 
 ![Figure 4. Train size vs median total runtime.](../results/figures/phase5_scalability_total_seconds_median.png)
 
@@ -190,11 +194,11 @@ Supporting Phase 6 figures are also available for metric-by-budget and runtime v
 - `results/figures/phase6_big_plus_adult_macro_f1.png`
 - `results/figures/phase6_big_plus_adult_total_seconds_median.png`
 
-Table 3 gives the corresponding Phase 6 summary values. Metrics are means over three seeds, and runtime is the median total runtime over the same seeds.
+Table 3 gives the corresponding Phase 6 summary values. Metrics are means over three seeds, and runtime is the median TabICL fit+predict time after the support set has already been constructed.
 
 **Table 3. Phase 6 Adult support-set selection results.**
 
-| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median Runtime (s) |
+| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median TabICL Fit+Predict Seconds |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Full Context | full | 0.8722 | 0.7919 | 0.8117 | 45.8005 |
 | Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.4771 |
@@ -209,9 +213,32 @@ Table 3 gives the corresponding Phase 6 summary values. Metrics are means over t
 
 The result is a negative ablation for the frozen Balanced Prototype Retrieval method. It does not outperform Random Subset or Balanced Random Subset. Balanced Random Subset is better than BPR on every metric and every budget. Relative to Random Subset, BPR has only one very small positive balanced-accuracy delta at budget 2048, and it remains clearly lower in accuracy and macro-F1.
 
-The runtime result is still useful. Full Context has median total runtime of 45.8005 seconds, while budget-limited strategies are roughly in the 2.5 to 4.8 second range. Support-set compression can therefore make TabICL much faster. However, the class-center prototype rule is not sufficient to improve predictive metrics in this setting.
+The runtime result is still useful, but its definition is important. The Phase 6 runtime column measures TabICL fit+predict time after the support set has been constructed. It does not include the time required to build the support set, including BPR preprocessing, class-center computation, and distance ranking. Under that model-side timing definition, Full Context has a median of 45.8005 seconds, while budget-limited strategies are roughly in the 2.5 to 4.8 second range. Support-set compression can therefore make TabICL model execution much faster, but a full retrieval-system runtime claim would need to include support-selection overhead.
 
 The correct conclusion is not that Big Plus "succeeds." The more careful conclusion is that support-set compression has practical value, and that Balanced Random Subset is a strong baseline that any future retrieval method must beat.
+
+## Supplemental Missingness Robustness Check
+
+To address missing-value robustness more directly, the project includes a small Adult-only stress test with train size 2048 and seed 42. For each missingness rate, deterministic masks were applied to both train and test feature cells, and all four models used the same masked split. Table 4 reports the resulting metrics and drops relative to the 0% injected-missingness baseline.
+
+**Table 4. Adult missingness robustness check at train size 2048, seed 42.**
+
+| Missing Rate | Model | Accuracy | Accuracy Drop | Balanced Accuracy | Balanced Accuracy Drop | Macro-F1 | Macro-F1 Drop |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.0 | LightGBM | 0.8508 | 0.0000 | 0.7692 | 0.0000 | 0.7835 | 0.0000 |
+| 0.0 | XGBoost | 0.8603 | 0.0000 | 0.7793 | 0.0000 | 0.7959 | 0.0000 |
+| 0.0 | TabPFN v2 | 0.8552 | 0.0000 | 0.7707 | 0.0000 | 0.7876 | 0.0000 |
+| 0.0 | TabICL | 0.8556 | 0.0000 | 0.7673 | 0.0000 | 0.7863 | 0.0000 |
+| 0.1 | LightGBM | 0.8418 | 0.0089 | 0.7549 | 0.0144 | 0.7695 | 0.0140 |
+| 0.1 | XGBoost | 0.8525 | 0.0078 | 0.7663 | 0.0130 | 0.7834 | 0.0125 |
+| 0.1 | TabPFN v2 | 0.8525 | 0.0027 | 0.7628 | 0.0079 | 0.7816 | 0.0061 |
+| 0.1 | TabICL | 0.8542 | 0.0013 | 0.7616 | 0.0057 | 0.7823 | 0.0040 |
+| 0.3 | LightGBM | 0.8255 | 0.0253 | 0.7213 | 0.0480 | 0.7389 | 0.0446 |
+| 0.3 | XGBoost | 0.8316 | 0.0287 | 0.7243 | 0.0550 | 0.7447 | 0.0512 |
+| 0.3 | TabPFN v2 | 0.8337 | 0.0215 | 0.7227 | 0.0480 | 0.7450 | 0.0426 |
+| 0.3 | TabICL | 0.8393 | 0.0163 | 0.7378 | 0.0295 | 0.7581 | 0.0282 |
+
+All models degrade as injected missingness increases. In this single-seed, 2048-train setting, TabICL has the smallest 30% missingness drop on all three metrics, but this result is only a supplemental check. It strengthens the claim that the project evaluates mixed-type and missing-value behavior, while still leaving a broader robustness benchmark as future work.
 
 ## Discussion
 
@@ -226,6 +253,8 @@ The Big Plus result is useful even though it is negative. It shows that a plausi
 ## Limitations
 
 This project uses only two mainline datasets, Adult and Bank Marketing, so the results should not be generalized to all tabular classification tasks.
+
+The missingness robustness check is deliberately small: Adult only, one train size, and one seed. It is useful as a sanity check under injected feature missingness, but it is not a systematic robustness study across missingness mechanisms, categorical-cardinality shifts, or additional benchmark suites.
 
 The project covers classification only. Regression and survival analysis are out of scope.
 
@@ -245,4 +274,4 @@ This project compares tabular foundation models and boosted-tree baselines on Ad
 
 Train-size scalability shows that larger training sets generally improve metrics but also increase runtime, especially for foundation models. Runtime analysis shows a practical gap: tree models are fastest, TabICL is much faster than TabPFN v2, and TabPFN v2 becomes expensive at larger train sizes.
 
-The Big Plus support-set selection experiment gives a useful negative result. Budget-limited support sets reduce TabICL runtime substantially, but the frozen balanced prototype retrieval strategy does not improve predictive performance over random subset or balanced random subset. The final lesson is conservative: TabICL is a promising foundation-model baseline for Bank Marketing and for practical extension work, but support-set retrieval methods need to beat strong random and balanced random baselines before they can be claimed as improvements.
+The Big Plus support-set selection experiment gives a useful negative result. Budget-limited support sets reduce TabICL model-side fit+predict runtime substantially, but the frozen balanced prototype retrieval strategy does not improve predictive performance over random subset or balanced random subset. The supplemental missingness check shows that all four models degrade under injected feature missingness, although it remains only a small sanity check. The final lesson is conservative: TabICL is a promising foundation-model baseline for Bank Marketing and for practical extension work, but support-set retrieval methods need to beat strong random and balanced random baselines before they can be claimed as improvements.

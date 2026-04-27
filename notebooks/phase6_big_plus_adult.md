@@ -535,12 +535,13 @@ Adult 主实验应该至少生成以下图。
 
 - `results/figures/`
 
-## 9. 当前结果说明了什么
+## 9. Historical smoke-test note
 
-当前还没有 Phase 6 完整 Adult 主实验结果。
-已经有一次 `budget=512, seed=42` 的 smoke test 结果，但它只用于确认脚本和结果 schema，不用于正式判断方法有效性。
+本节是早期 smoke-test 阶段的历史记录，不是最终结论。
+完整 Adult 主实验已经完成，正式结论见第 13 节。
+早期 `budget=512, seed=42` 的 smoke test 只用于确认脚本和结果 schema，不用于判断方法有效性。
 
-所以现在只能说：
+在当时只能说：
 
 - Big Plus 方法定义已经冻结
 - Adult 主实验设计已经明确
@@ -548,13 +549,13 @@ Adult 主实验应该至少生成以下图。
 - Phase 6 Adult 脚本已经实现
 - smoke test 已确认四种策略都能运行并写出 CSV
 
-不能说：
+当时不能说：
 
 - `Balanced Prototype Retrieval` 已经提升了 accuracy
 - Big Plus 已经在 Adult 上成功
 - 该方法已经能迁移到 Bank Marketing
 
-这些都需要后续真实实验结果支持。
+这些后来已经由完整 Adult 主实验验证；最终结论是 frozen BPR 没有超过随机 baseline。
 
 ## 10. 遇到的问题与风险
 
@@ -618,29 +619,30 @@ Adult 主实验的预算受限部分是：
 这比主线小，但仍然不是零成本。
 所以后续脚本实现时仍应先 smoke test，再跑完整实验。
 
-## 11. 下一阶段怎么接
+## 11. 当前复现方式
 
-下一步可以进入 Phase 6 实验脚本实现。
+Phase 6 脚本已经实现并完成 Adult 主实验。
+当前复现方式如下。
 
-建议顺序是：
-
-1. 新增 `src/phase6_big_plus_adult.py`
-2. 复用 Phase 4/5 中的 Adult 数据加载、split、指标和 runtime 记录
-3. 先实现四种支持集策略和配额函数
-4. 先跑最小 smoke test：
+Smoke preset 默认写入 `results/smoke/`，避免无参数命令覆盖正式 CSV：
 
 ```bash
-python3 src/phase6_big_plus_adult.py --strategies random_subset balanced_random_subset balanced_prototype_retrieval --budgets 512 --seeds 42
+python3 src/phase6_big_plus_adult.py
 ```
 
-5. smoke test 通过后，再运行完整 Adult 主实验：
+或显式运行 smoke：
 
 ```bash
-python3 src/phase6_big_plus_adult.py --strategies full_context random_subset balanced_random_subset balanced_prototype_retrieval --budgets 512 2048 8192 --seeds 42 43 44
+python3 src/phase6_big_plus_adult.py --preset smoke --budgets 512 --seeds 42
 ```
 
-这一阶段最重要的是守住冻结方法。
-如果结果不好，先记录和解释，不立即改算法。
+完整 Adult 主实验需要显式使用 final preset：
+
+```bash
+python3 src/phase6_big_plus_adult.py --preset final
+```
+
+这一节替代了早期“下一步实现脚本”的计划口径。
 
 ## 12. 第二步：脚本实现与 smoke test（历史记录）
 
@@ -668,19 +670,17 @@ python3 src/phase6_big_plus_adult.py --strategies full_context random_subset bal
 - `balanced_random_subset`
 - `balanced_prototype_retrieval`
 
-脚本默认是 smoke-test 友好的设置：
+脚本默认是 smoke-test 友好的设置，并写入 `results/smoke/`，避免误覆盖正式结果：
 
 - strategies：默认 all four
 - budgets：默认 `512`
 - seeds：默认 `42`
+- output：默认 `results/smoke/`
 
 完整 Adult 主实验需要显式传入：
 
 ```bash
-python3 src/phase6_big_plus_adult.py \
-  --strategies full_context random_subset balanced_random_subset balanced_prototype_retrieval \
-  --budgets 512 2048 8192 \
-  --seeds 42 43 44
+python3 src/phase6_big_plus_adult.py --preset final
 ```
 
 ### 12.3 Smoke test 命令
@@ -688,7 +688,7 @@ python3 src/phase6_big_plus_adult.py \
 本次只运行：
 
 ```bash
-python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42
+python3 src/phase6_big_plus_adult.py --preset smoke --budgets 512 --seeds 42
 ```
 
 它覆盖：
@@ -703,8 +703,9 @@ python3 src/phase6_big_plus_adult.py --budgets 512 --seeds 42
 
 生成文件：
 
-- `results/phase6_big_plus_adult.csv`
-- `results/phase6_big_plus_adult_summary.csv`
+- 当前脚本默认生成到 `results/smoke/phase6_big_plus_adult.csv`
+- 当前脚本默认生成到 `results/smoke/phase6_big_plus_adult_summary.csv`
+- 早期历史 smoke test 曾直接写入正式 `results/phase6_*` 文件；这个风险已经通过 `--preset smoke|final` 和 smoke 默认输出目录修复
 
 detail CSV 当前为 `4` 行：
 
@@ -733,7 +734,7 @@ detail CSV 包含这些列：
 dataset, seed, split, strategy, strategy_display, budget, requested_budget,
 actual_support_size, support_class_counts, model, metric, accuracy,
 balanced_accuracy, macro_f1, fit_seconds, predict_seconds, total_seconds,
-device, full_train_size, test_size, n_samples_total, n_features_raw,
+selection_seconds, end_to_end_seconds, device, full_train_size, test_size, n_samples_total, n_features_raw,
 n_numeric_features, n_categorical_features, n_features_after_preprocessing,
 retrieval_n_features_after_encoding, random_state, test_size_ratio,
 data_cache, input_representation, selection_method, notes
@@ -748,7 +749,7 @@ actual_support_size_max, support_class_counts, accuracy_mean, accuracy_std,
 accuracy_min, accuracy_max, balanced_accuracy_mean, balanced_accuracy_std,
 balanced_accuracy_min, balanced_accuracy_max, macro_f1_mean, macro_f1_std,
 macro_f1_min, macro_f1_max, fit_seconds_median, predict_seconds_median,
-total_seconds_median
+total_seconds_median, selection_seconds_median, end_to_end_seconds_median
 ```
 
 已确认：
@@ -866,10 +867,10 @@ BPR delta 图直接展示 `Balanced Prototype Retrieval` 相对 `Random Subset` 
 
 ### 13.5 runtime 结论
 
-runtime 符合预期。
-`Full Context` 的 median total runtime 为 `45.8005s`，显著高于预算受限策略。
+runtime 符合预期，但这里的 `total_seconds_median` 是 TabICL fit+predict 的模型侧时间，不包含 support-set selection overhead。
+`Full Context` 的 median TabICL fit+predict runtime 为 `45.8005s`，显著高于预算受限策略。
 
-budget-limited 策略的 median total runtime：
+budget-limited 策略的 median TabICL fit+predict runtime：
 
 - `512`：约 `3.27s` 到 `3.48s`
 - `2048`：约 `2.48s` 到 `2.54s`
@@ -877,6 +878,7 @@ budget-limited 策略的 median total runtime：
 
 这说明压缩支持集确实带来明显工程效率收益。
 但是在当前冻结的 BPR 定义下，效率收益没有同时转化为性能收益。
+如果要讨论完整 retrieval-system runtime，需要额外计入 BPR preprocessing、class-center 计算和 distance ranking 等选择开销；更新后的脚本已为新运行记录 `selection_seconds` 和 `end_to_end_seconds`。
 
 ### 13.6 后续论文/报告写法建议
 

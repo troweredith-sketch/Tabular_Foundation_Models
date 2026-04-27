@@ -241,9 +241,13 @@ def plot_runtime(summary_df: pd.DataFrame, budgets: list[int]) -> list[Path]:
         label=f"{STRATEGY_LABELS[FULL_CONTEXT]} ({full_runtime:.1f}s)",
     )
 
-    axis.set_title("Adult Phase 6: Median Runtime by Support Budget", fontsize=13, weight="bold")
+    axis.set_title(
+        "Adult Phase 6: Median TabICL Fit+Predict Runtime by Support Budget",
+        fontsize=13,
+        weight="bold",
+    )
     axis.set_xlabel("Support budget")
-    axis.set_ylabel("Median total runtime (seconds, log scale)")
+    axis.set_ylabel("Median TabICL fit+predict seconds (log scale)")
     axis.set_xticks(x_positions)
     axis.set_xticklabels([str(budget) for budget in budgets])
     axis.set_yscale("log")
