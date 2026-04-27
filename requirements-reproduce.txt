@@ -1,0 +1,18 @@
+# Pinned core environment for reproducing the submitted artifacts.
+# Snapshot source: project-local .venv on 2026-04-27.
+# Python: 3.12.3
+# CUDA used for submitted foundation-model runs: NVIDIA GeForce RTX 4060 Laptop GPU
+
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+matplotlib==3.10.8
+openml==0.15.1
+xgboost==3.2.0
+lightgbm==4.6.0
+tabpfn==7.1.1
+tabicl==2.1.0
+torch==2.11.0
+markdown==3.10.2
+weasyprint==68.1
+pymupdf==1.27.2.3

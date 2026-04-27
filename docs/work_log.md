@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # 项目过程日志
 
 这份文档按时间记录每次学习、调试、写代码和推进项目时做了什么。

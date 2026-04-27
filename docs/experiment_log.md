@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # 实验记录
 
 这份文档专门记录实验本身，后面写报告时可以直接从这里提取结果和观察。

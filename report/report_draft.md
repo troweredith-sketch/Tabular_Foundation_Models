@@ -30,7 +30,7 @@ Tabular foundation models aim to reuse learned structure across tabular predicti
 
 Accuracy is easy to understand but can hide minority-class behavior. This is especially important for Bank Marketing, where class imbalance makes accuracy alone insufficient. Balanced accuracy and macro-F1 are therefore included as complementary metrics. Runtime is also part of the evaluation because a model that is accurate but too slow may be difficult to use in practice.
 
-This project does not use TALENT, TabArena, or any other external tabular benchmark suite. All reported experiments are local experiments on the selected OpenML datasets.
+This project does not use TALENT, TabArena, or any other external tabular benchmark suite. All reported experiments are local experiments on the selected OpenML datasets, so Adult and Bank Marketing should be read as a lightweight benchmark subset rather than as suite-level benchmark coverage.
 
 ## Datasets
 
@@ -69,6 +69,14 @@ The metrics are:
 - Fit seconds, predict seconds, and total seconds.
 
 Runtime values are practical mixed-device timings. Tree models run on CPU, while foundation models may use CUDA. Runtime should therefore be interpreted as practical local cost rather than as a strict same-device hardware benchmark.
+
+### Timing Protocol and Hardware
+
+The submitted artifacts were generated in WSL Ubuntu with Python 3.12.3 on an AMD Ryzen 7 8845H CPU and an NVIDIA GeForce RTX 4060 Laptop GPU. The key package snapshot was NumPy 2.4.4, pandas 3.0.2, scikit-learn 1.8.0, LightGBM 4.6.0, XGBoost 3.2.0, PyTorch 2.11.0, TabPFN 7.1.1, and TabICL 2.1.0.
+
+The timing scope is script-level practical timing around each model's fit and predict calls. For LightGBM and XGBoost, preprocessing is inside the scikit-learn pipeline and is included in fit/predict timing. For TabPFN v2, the external median-imputation and ordinal-encoding preparation happens before the measured model fit call, while model fit and predict are timed. For TabICL, the model fit and predict calls include its internal tabular transformation work. Model object construction, package import time, CSV loading, OpenML cache reads, and report rendering are not included in the model runtime columns.
+
+The TabICL checkpoint is explicitly made available before the main loop so that checkpoint download or first-load setup does not pollute per-run timing. No separate same-device warm-up, memory benchmark, or CPU-only/GPU-only normalization protocol was applied. Runtime medians should therefore be interpreted as practical local execution costs under this environment, not as hardware-normalized speed rankings.
 
 LightGBM and XGBoost are fixed strong baselines. They are not tuned state-of-the-art baselines. This choice keeps the project focused on a controlled course-project comparison rather than hyperparameter search.
 
@@ -154,7 +162,7 @@ The endpoint view supports two conclusions. First, additional training data usua
 
 Runtime is a central practical tradeoff in this project. Figure 4 summarizes median total runtime over the train-size grid.
 
-Table 1 and the scalability analysis are generated from separate experiment outputs. Predictive metrics are directly comparable across the shared split protocol, while runtime medians should be read as practical local timings that can vary across reruns, especially for GPU-backed foundation-model runs.
+Table 1 and the scalability analysis are generated from separate experiment outputs. Table 1 uses the Phase 4 mainline output, while Table 2 and Figure 4 use the Phase 5 scalability output. Predictive metrics are directly comparable across the shared split protocol, while runtime medians should be read as practical local timings that can vary across independent reruns, especially for GPU-backed foundation-model runs.
 
 ![Figure 4. Train size vs median total runtime.](../results/figures/phase5_scalability_total_seconds_median.png)
 
@@ -252,9 +260,9 @@ The Big Plus result is useful even though it is negative. It shows that a plausi
 
 ## Limitations
 
-This project uses only two mainline datasets, Adult and Bank Marketing, so the results should not be generalized to all tabular classification tasks.
+This project uses only two mainline datasets, Adult and Bank Marketing, so the results should not be generalized to all tabular classification tasks. It also does not claim TALENT or TabArena suite coverage.
 
-The missingness robustness check is deliberately small: Adult only, one train size, and one seed. It is useful as a sanity check under injected feature missingness, but it is not a systematic robustness study across missingness mechanisms, categorical-cardinality shifts, or additional benchmark suites.
+The missingness robustness check is deliberately small: Adult only, one train size, one seed, and cell-level injected missingness at three rates. It is useful as a sanity check under injected feature missingness, but it is not a systematic robustness study across missingness mechanisms, categorical-cardinality shifts, or additional benchmark suites.
 
 The project covers classification only. Regression and survival analysis are out of scope.
 

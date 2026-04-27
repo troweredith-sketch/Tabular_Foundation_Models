@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # 项目阶段计划（硬要求优先版）
 
 这份文档是当前项目的主规划文档。

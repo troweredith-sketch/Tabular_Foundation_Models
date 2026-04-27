@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # 项目记忆卡
 
 这是一张给后续对话快速续接用的短记忆卡。

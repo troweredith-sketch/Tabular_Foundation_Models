@@ -167,6 +167,16 @@ def resolve_project_root() -> Path:
     raise FileNotFoundError("Could not find project root that contains results/.")
 
 
+def format_project_path(path: Path, project_root: Path | None = None) -> str:
+    """Return a stable repository-relative path when possible."""
+    resolved_path = path.resolve()
+    resolved_root = (project_root or resolve_project_root()).resolve()
+    try:
+        return resolved_path.relative_to(resolved_root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def normalize_choice_list(values: list[str], defaults: list[str]) -> list[str]:
     if ALL_TOKEN in values:
         return defaults
@@ -768,7 +778,7 @@ def run_single_dataset_scenario_seed(
         "n_categorical_features": len(categorical_cols),
         "random_state": seed,
         "test_size_ratio": TEST_SIZE,
-        "data_cache": str(cache_path),
+        "data_cache": format_project_path(cache_path),
     }
 
     model_results = run_models_for_configuration(

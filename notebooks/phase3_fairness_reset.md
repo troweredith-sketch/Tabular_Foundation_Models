@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # Phase 3：主线口径修正与公平性加固（最终版）
 
 这篇文档是 Phase 3 的最终学习型复盘。  

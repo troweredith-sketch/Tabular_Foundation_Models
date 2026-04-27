@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # Phase 5：主线硬要求闭环与结果补强
 
 这篇文档是 Phase 5 的学习型 notebook。

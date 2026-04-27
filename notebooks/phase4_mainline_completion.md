@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # Phase 4：主线模型与数据集补齐（最终版）
 
 这篇文档是 Phase 4 的最终学习型复盘。  

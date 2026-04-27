@@ -12,7 +12,7 @@ Course project repository for comparing tabular foundation models with boosted-t
 
 ### Current Status
 
-The project is submission-ready.
+The project is submission-ready with documented limitations.
 
 Final deliverables:
 
@@ -122,16 +122,29 @@ Recommended environment: WSL Ubuntu with a project-local virtual environment.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-basic.txt
+pip install -r requirements-reproduce.txt
 ```
 
 Dependency files:
 
 - `requirements-basic.txt`: minimal install list for the project scripts.
+- `requirements-reproduce.txt`: pinned core environment for reproducing the submitted artifacts and rendering reports.
 - `requirements-lock.txt`: key package snapshot used for the submitted experiments.
 - `requirements-freeze.txt`: full transitive environment snapshot from the project `.venv`.
 
-Some foundation-model runs may require additional packages and CUDA support, depending on the local machine.
+The submitted final runs used Python 3.12.3 in WSL Ubuntu, CPU tree models, and CUDA-backed foundation-model runs on an NVIDIA GeForce RTX 4060 Laptop GPU. CPU-only environments can still run the lightweight unit tests and some smoke paths, but full foundation-model reproduction may be much slower or unavailable without compatible CUDA packages and downloaded checkpoints.
+
+### Quick Verification
+
+Use the project-local virtual environment and run:
+
+```bash
+source .venv/bin/activate
+python -m unittest discover -s tests
+python3 src/render_reports.py
+```
+
+The first command runs lightweight regression and artifact checks. The second regenerates `report/report_draft.pdf`, `report/final_report.pdf`, `report/report_draft_zh.pdf`, and `report/final_report_zh_study.pdf` from the Markdown sources.
 
 ### Reproducing Main Artifacts
 
@@ -160,6 +173,7 @@ python3 src/phase6_make_big_plus_figures.py
 
 The default `phase6_big_plus_adult.py` command now runs a smoke preset and writes to
 `results/smoke/`; use `--preset final` to reproduce the final Phase 6 CSV files.
+The smoke preset is intended for CPU-friendly workflow checks. The final preset is the committed experiment grid and may require CUDA-capable foundation-model execution.
 
 Supplemental Adult missingness robustness check:
 
@@ -196,7 +210,7 @@ The handoff notes explicitly record that Phase 7 was not started and that the Ph
 
 ### 当前状态
 
-项目已经进入 submission-ready 状态。
+项目已经进入带有明确限制说明的 submission-ready 状态。
 
 最终交付文件：
 
@@ -306,16 +320,29 @@ Phase 6 的补充图表也在 `results/figures/` 中。
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-basic.txt
+pip install -r requirements-reproduce.txt
 ```
 
 依赖文件说明：
 
 - `requirements-basic.txt`：项目脚本的最小安装列表。
+- `requirements-reproduce.txt`：用于复现提交 artifacts 和渲染报告的核心 pinned 环境。
 - `requirements-lock.txt`：提交实验使用的关键包版本快照。
 - `requirements-freeze.txt`：从项目 `.venv` 导出的完整传递依赖环境快照。
 
-部分 foundation-model 实验可能还需要额外依赖和 CUDA 支持，取决于本地机器环境。
+提交版最终实验使用 WSL Ubuntu 中的 Python 3.12.3，树模型在 CPU 上运行，foundation-model 运行使用 NVIDIA GeForce RTX 4060 Laptop GPU 上的 CUDA。CPU-only 环境仍可运行轻量单元测试和部分 smoke 路径，但如果没有兼容 CUDA 包和已下载 checkpoint，完整 foundation-model 复现可能会非常慢或不可用。
+
+### 快速验证
+
+使用项目本地虚拟环境运行：
+
+```bash
+source .venv/bin/activate
+python -m unittest discover -s tests
+python3 src/render_reports.py
+```
+
+第一条命令运行轻量 regression 和 artifact 检查。第二条命令会从 Markdown 源文件重新生成 `report/report_draft.pdf`、`report/final_report.pdf`、`report/report_draft_zh.pdf` 和 `report/final_report_zh_study.pdf`。
 
 ### 复现主要产物
 
@@ -344,6 +371,7 @@ python3 src/phase6_make_big_plus_figures.py
 
 `phase6_big_plus_adult.py` 的默认无参数命令现在只运行 smoke preset，并写入
 `results/smoke/`；要复现最终 Phase 6 CSV，请显式使用 `--preset final`。
+Smoke preset 主要用于 CPU 友好的工作流检查；final preset 对应已提交实验网格，可能需要可用的 CUDA foundation-model 运行环境。
 
 补充 Adult missingness robustness 检查：
 

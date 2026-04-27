@@ -104,6 +104,77 @@ class ReviewFixTests(unittest.TestCase):
         pd.testing.assert_frame_equal(result, frame)
         self.assertIsNot(result, frame)
 
+    def test_format_project_path_returns_repository_relative_cache_path(self) -> None:
+        absolute_cache_path = PROJECT_ROOT / "data" / "raw" / "adult_openml.csv"
+
+        formatted = phase4.format_project_path(absolute_cache_path, PROJECT_ROOT)
+
+        self.assertEqual(formatted, "data/raw/adult_openml.csv")
+
+    def test_committed_result_csvs_do_not_expose_author_absolute_cache_paths(self) -> None:
+        csv_paths = sorted((PROJECT_ROOT / "results").glob("*.csv"))
+        self.assertGreater(len(csv_paths), 0)
+
+        for csv_path in csv_paths:
+            frame = pd.read_csv(csv_path)
+            if "data_cache" not in frame.columns:
+                continue
+
+            with self.subTest(csv=csv_path.name):
+                data_cache_values = frame["data_cache"].dropna().astype(str)
+                self.assertGreater(len(data_cache_values), 0)
+                self.assertFalse(
+                    data_cache_values.str.startswith("/home/mr/src/").any(),
+                    msg=f"{csv_path} contains an author-machine absolute data_cache path.",
+                )
+                self.assertTrue(
+                    data_cache_values.str.startswith("data/raw/").all(),
+                    msg=f"{csv_path} should use repository-relative data_cache paths.",
+                )
+
+    def test_key_result_artifacts_have_expected_schema_and_size(self) -> None:
+        expectations = {
+            "phase4_mainline_compare.csv": {
+                "rows": 80,
+                "columns": {"dataset", "scenario", "seed", "model", "accuracy", "balanced_accuracy", "macro_f1"},
+            },
+            "phase5_scalability_compare_summary.csv": {
+                "rows": 40,
+                "columns": {"dataset", "train_size_label", "model", "accuracy_mean", "total_seconds_median"},
+            },
+            "phase6_big_plus_adult_summary.csv": {
+                "rows": 10,
+                "columns": {"strategy", "budget", "accuracy_mean", "selection_seconds_median", "end_to_end_seconds_median"},
+            },
+            "missingness_robustness_adult_summary.csv": {
+                "rows": 12,
+                "columns": {"missing_rate", "model", "accuracy_mean", "accuracy_drop_mean"},
+            },
+        }
+
+        for filename, expectation in expectations.items():
+            csv_path = PROJECT_ROOT / "results" / filename
+            frame = pd.read_csv(csv_path)
+
+            with self.subTest(csv=filename):
+                self.assertEqual(len(frame), expectation["rows"])
+                self.assertTrue(expectation["columns"].issubset(frame.columns))
+
+    def test_report_referenced_main_figures_exist(self) -> None:
+        figure_names = [
+            "phase5_scalability_accuracy.png",
+            "phase5_scalability_balanced_accuracy.png",
+            "phase5_scalability_macro_f1.png",
+            "phase5_scalability_total_seconds_median.png",
+            "phase6_big_plus_adult_bpr_delta.png",
+        ]
+
+        for figure_name in figure_names:
+            figure_path = PROJECT_ROOT / "results" / "figures" / figure_name
+            with self.subTest(figure=figure_name):
+                self.assertTrue(figure_path.exists())
+                self.assertGreater(figure_path.stat().st_size, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

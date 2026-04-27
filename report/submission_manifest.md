@@ -57,9 +57,40 @@ PDF versions of the generated figures are also present in `results/figures/`.
 
 The Phase 6 result should be presented as a negative ablation: budget-limited support sets reduce runtime, but the frozen Balanced Prototype Retrieval rule does not outperform Random Subset or Balanced Random Subset.
 
+## Reproduction and Verification
+
+Recommended setup:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-reproduce.txt
+```
+
+Lightweight checks:
+
+```bash
+python -m unittest discover -s tests
+python3 src/render_reports.py
+```
+
+The final CSV and figures are committed. Re-running Phase 4, Phase 5, or Phase 6 final experiments is only needed when intentionally reproducing the frozen experiment artifacts from scratch.
+
+## Timing and Hardware Context
+
+- Submitted environment: WSL Ubuntu, Python 3.12.3.
+- CPU: AMD Ryzen 7 8845H.
+- GPU for foundation-model final runs: NVIDIA GeForce RTX 4060 Laptop GPU.
+- Runtime columns are practical mixed-device timings, not same-device normalized speed benchmarks.
+- Table 1 runtime comes from the Phase 4 mainline output; Table 2 and Figure 4 runtime come from the independent Phase 5 scalability output.
+- TabICL checkpoint availability is prepared before the main loop; checkpoint download/setup is not intended to be counted in per-run timing.
+
 ## Explicitly Not Done / Caveats
 
+- TALENT, TabArena, and other external benchmark suites were not run; Adult and Bank Marketing are a lightweight OpenML benchmark subset.
+- LightGBM and XGBoost are fixed strong baselines, not tuned state-of-the-art baselines.
 - Phase 7 was not started.
 - The frozen Phase 6 method definition was not changed, but `src/phase6_big_plus_adult.py` now has a safer `--preset smoke|final` interface and records selection/end-to-end timing in the committed Phase 6 artifacts.
-- The supplemental missingness check is a small sanity check, not a full robustness benchmark.
-- `requirements-basic.txt` is the minimal install list, `requirements-lock.txt` records the key submitted package versions, and `requirements-freeze.txt` is the full transitive `.venv` snapshot.
+- The supplemental missingness check is a small Adult-only, single-seed sanity check, not a full robustness benchmark.
+- `requirements-basic.txt` is the minimal install list, `requirements-reproduce.txt` pins the core reproduction/report-rendering environment, `requirements-lock.txt` records the key submitted package versions, and `requirements-freeze.txt` is the full transitive `.venv` snapshot.
+- Detail CSV `data_cache` fields use repository-relative paths such as `data/raw/adult_openml.csv` rather than author-machine absolute paths.

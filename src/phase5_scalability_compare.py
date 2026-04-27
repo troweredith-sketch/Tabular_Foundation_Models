@@ -328,7 +328,7 @@ def run_single_dataset_train_size_seed(
         "n_categorical_features": len(categorical_cols),
         "random_state": seed,
         "test_size_ratio": phase4.TEST_SIZE,
-        "data_cache": str(cache_path),
+        "data_cache": phase4.format_project_path(cache_path),
     }
 
     model_results = run_models_for_train_size(

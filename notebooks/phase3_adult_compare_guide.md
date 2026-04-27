@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # 第三阶段操作指南
 
 这份文档是给你在 Phase 3 里快速上手脚本和结果文件用的。

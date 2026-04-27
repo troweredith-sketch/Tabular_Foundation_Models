@@ -1,3 +1,5 @@
+> Final source of truth: use report/report_draft.md, results/*.csv, and report/submission_manifest.md for the submitted results. This file may include historical planning or work-log context.
+
 # Phase 6：Big Plus 方法冻结与 Adult 主实验分析
 
 这篇文档是 Phase 6 的学习型 notebook。
