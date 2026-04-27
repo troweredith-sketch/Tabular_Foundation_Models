@@ -125,8 +125,11 @@ source .venv/bin/activate
 pip install -r requirements-basic.txt
 ```
 
-The key package versions used for the submitted experiments are recorded in
-`requirements-lock.txt`.
+Dependency files:
+
+- `requirements-basic.txt`: minimal install list for the project scripts.
+- `requirements-lock.txt`: key package snapshot used for the submitted experiments.
+- `requirements-freeze.txt`: full transitive environment snapshot from the project `.venv`.
 
 Some foundation-model runs may require additional packages and CUDA support, depending on the local machine.
 
@@ -306,7 +309,11 @@ source .venv/bin/activate
 pip install -r requirements-basic.txt
 ```
 
-提交实验使用的关键包版本记录在 `requirements-lock.txt`。
+依赖文件说明：
+
+- `requirements-basic.txt`：项目脚本的最小安装列表。
+- `requirements-lock.txt`：提交实验使用的关键包版本快照。
+- `requirements-freeze.txt`：从项目 `.venv` 导出的完整传递依赖环境快照。
 
 部分 foundation-model 实验可能还需要额外依赖和 CUDA 支持，取决于本地机器环境。
 

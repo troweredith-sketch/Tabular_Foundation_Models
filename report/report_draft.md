@@ -194,26 +194,26 @@ Supporting Phase 6 figures are also available for metric-by-budget and runtime v
 - `results/figures/phase6_big_plus_adult_macro_f1.png`
 - `results/figures/phase6_big_plus_adult_total_seconds_median.png`
 
-Table 3 gives the corresponding Phase 6 summary values. Metrics are means over three seeds, and runtime is the median TabICL fit+predict time after the support set has already been constructed.
+Table 3 gives the corresponding Phase 6 summary values. Metrics are means over three seeds. Runtime is split into median TabICL fit+predict time after support-set construction, median support-selection time, and median end-to-end time.
 
 **Table 3. Phase 6 Adult support-set selection results.**
 
-| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median TabICL Fit+Predict Seconds |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Full Context | full | 0.8722 | 0.7919 | 0.8117 | 45.8005 |
-| Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.4771 |
-| Random Subset | 2048 | 0.8573 | 0.7668 | 0.7873 | 2.5291 |
-| Random Subset | 8192 | 0.8654 | 0.7874 | 0.8038 | 4.6601 |
-| Balanced Random Subset | 512 | 0.7964 | 0.8180 | 0.7610 | 3.4701 |
-| Balanced Random Subset | 2048 | 0.8155 | 0.8295 | 0.7792 | 2.5361 |
-| Balanced Random Subset | 8192 | 0.8344 | 0.8293 | 0.7941 | 4.6720 |
-| Balanced Prototype Retrieval | 512 | 0.7020 | 0.7093 | 0.6588 | 3.2666 |
-| Balanced Prototype Retrieval | 2048 | 0.7336 | 0.7684 | 0.7002 | 2.4829 |
-| Balanced Prototype Retrieval | 8192 | 0.6437 | 0.7256 | 0.6253 | 4.7904 |
+| Strategy | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median Fit+Predict Seconds | Median Selection Seconds | Median End-to-End Seconds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Full Context | full | 0.8722 | 0.7919 | 0.8117 | 28.7849 | 0.0002 | 28.7851 |
+| Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.0325 | 0.0009 | 3.0334 |
+| Random Subset | 2048 | 0.8573 | 0.7668 | 0.7873 | 2.2889 | 0.0017 | 2.2910 |
+| Random Subset | 8192 | 0.8654 | 0.7874 | 0.8038 | 3.9785 | 0.0030 | 3.9818 |
+| Balanced Random Subset | 512 | 0.7964 | 0.8180 | 0.7610 | 2.9976 | 0.0029 | 3.0097 |
+| Balanced Random Subset | 2048 | 0.8155 | 0.8295 | 0.7792 | 2.1456 | 0.0031 | 2.1487 |
+| Balanced Random Subset | 8192 | 0.8344 | 0.8293 | 0.7941 | 3.9814 | 0.0052 | 3.9869 |
+| Balanced Prototype Retrieval | 512 | 0.7021 | 0.7093 | 0.6588 | 2.7719 | 0.1850 | 2.9569 |
+| Balanced Prototype Retrieval | 2048 | 0.7336 | 0.7684 | 0.7002 | 2.0001 | 0.1848 | 2.1781 |
+| Balanced Prototype Retrieval | 8192 | 0.6437 | 0.7256 | 0.6253 | 4.0640 | 0.1869 | 4.2452 |
 
 The result is a negative ablation for the frozen Balanced Prototype Retrieval method. It does not outperform Random Subset or Balanced Random Subset. Balanced Random Subset is better than BPR on every metric and every budget. Relative to Random Subset, BPR has only one very small positive balanced-accuracy delta at budget 2048, and it remains clearly lower in accuracy and macro-F1.
 
-The runtime result is still useful, but its definition is important. The Phase 6 runtime column measures TabICL fit+predict time after the support set has been constructed. It does not include the time required to build the support set, including BPR preprocessing, class-center computation, and distance ranking. Under that model-side timing definition, Full Context has a median of 45.8005 seconds, while budget-limited strategies are roughly in the 2.5 to 4.8 second range. Support-set compression can therefore make TabICL model execution much faster, but a full retrieval-system runtime claim would need to include support-selection overhead.
+The runtime result is still useful, but its definition is important. The fit+predict column measures TabICL model time after the support set has been constructed. The selection and end-to-end columns include the support-set construction step recorded by the current script. Under the model-side timing definition, Full Context has a median of 28.7849 seconds, while budget-limited strategies are roughly in the 2.0 to 4.1 second range. BPR adds about 0.185 seconds of median selection overhead in this implementation. Support-set compression can therefore make TabICL execution much faster, but the BPR selection rule still does not turn that efficiency gain into a predictive-performance gain.
 
 The correct conclusion is not that Big Plus "succeeds." The more careful conclusion is that support-set compression has practical value, and that Balanced Random Subset is a strong baseline that any future retrieval method must beat.
 

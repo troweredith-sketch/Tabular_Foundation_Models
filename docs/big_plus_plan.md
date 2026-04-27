@@ -264,9 +264,11 @@ Big Plus 必须在主线硬要求闭环之后再运行。
 - `Balanced Prototype Retrieval`
 - 最强树模型 baseline
 
-## 11. Big Plus 成功标准
+## 11. Pre-experiment Big Plus success criteria, retained as historical design notes
 
-满足下面任意一种，都可以认为 Big Plus 成立：
+以下标准是实验前用于约束设计和判断结果价值的历史标准。最终 Phase 6 结果没有达到 performance-improving method 的标准；报告中将其解释为 negative ablation，而不是宣称 `Balanced Prototype Retrieval` 是成功的新方法。
+
+实验前，满足下面任意一种，都可以认为 Big Plus 方向有提交价值：
 
 ### 情况 A：准确率提升
 

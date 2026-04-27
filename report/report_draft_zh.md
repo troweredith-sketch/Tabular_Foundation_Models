@@ -196,26 +196,26 @@ Figure 5 直接比较 BPR 与两个 budget-fair random baselines。负柱表示 
 - `results/figures/phase6_big_plus_adult_macro_f1.png`
 - `results/figures/phase6_big_plus_adult_total_seconds_median.png`
 
-Table 3 给出对应的 Phase 6 summary values。Metrics 是三个 seeds 的均值，runtime 是支持集已经构造完成之后的 TabICL fit+predict 时间中位数。
+Table 3 给出对应的 Phase 6 summary values。Metrics 是三个 seeds 的均值。Runtime 拆成三部分：支持集构造完成之后的 TabICL fit+predict 时间中位数、support-selection 时间中位数，以及 end-to-end 时间中位数。
 
 **表 3. Phase 6 Adult 支持集选择结果。**
 
-| 策略 | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median TabICL Fit+Predict Seconds |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Full Context | full | 0.8722 | 0.7919 | 0.8117 | 45.8005 |
-| Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.4771 |
-| Random Subset | 2048 | 0.8573 | 0.7668 | 0.7873 | 2.5291 |
-| Random Subset | 8192 | 0.8654 | 0.7874 | 0.8038 | 4.6601 |
-| Balanced Random Subset | 512 | 0.7964 | 0.8180 | 0.7610 | 3.4701 |
-| Balanced Random Subset | 2048 | 0.8155 | 0.8295 | 0.7792 | 2.5361 |
-| Balanced Random Subset | 8192 | 0.8344 | 0.8293 | 0.7941 | 4.6720 |
-| Balanced Prototype Retrieval | 512 | 0.7020 | 0.7093 | 0.6588 | 3.2666 |
-| Balanced Prototype Retrieval | 2048 | 0.7336 | 0.7684 | 0.7002 | 2.4829 |
-| Balanced Prototype Retrieval | 8192 | 0.6437 | 0.7256 | 0.6253 | 4.7904 |
+| 策略 | Budget | Accuracy | Balanced Accuracy | Macro-F1 | Median Fit+Predict Seconds | Median Selection Seconds | Median End-to-End Seconds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Full Context | full | 0.8722 | 0.7919 | 0.8117 | 28.7849 | 0.0002 | 28.7851 |
+| Random Subset | 512 | 0.8438 | 0.7358 | 0.7592 | 3.0325 | 0.0009 | 3.0334 |
+| Random Subset | 2048 | 0.8573 | 0.7668 | 0.7873 | 2.2889 | 0.0017 | 2.2910 |
+| Random Subset | 8192 | 0.8654 | 0.7874 | 0.8038 | 3.9785 | 0.0030 | 3.9818 |
+| Balanced Random Subset | 512 | 0.7964 | 0.8180 | 0.7610 | 2.9976 | 0.0029 | 3.0097 |
+| Balanced Random Subset | 2048 | 0.8155 | 0.8295 | 0.7792 | 2.1456 | 0.0031 | 2.1487 |
+| Balanced Random Subset | 8192 | 0.8344 | 0.8293 | 0.7941 | 3.9814 | 0.0052 | 3.9869 |
+| Balanced Prototype Retrieval | 512 | 0.7021 | 0.7093 | 0.6588 | 2.7719 | 0.1850 | 2.9569 |
+| Balanced Prototype Retrieval | 2048 | 0.7336 | 0.7684 | 0.7002 | 2.0001 | 0.1848 | 2.1781 |
+| Balanced Prototype Retrieval | 8192 | 0.6437 | 0.7256 | 0.6253 | 4.0640 | 0.1869 | 4.2452 |
 
 对于冻结的 Balanced Prototype Retrieval 方法来说，这个结果是一个 negative ablation。它没有超过 Random Subset 或 Balanced Random Subset。Balanced Random Subset 在每个 metric 和每个 budget 上都优于 BPR。相对 Random Subset，BPR 只有在 budget 2048 下有一个非常小的 positive balanced-accuracy delta，但 accuracy 和 macro-F1 仍然明显更低。
 
-Runtime 结果仍然有价值，但必须明确它的定义。Phase 6 runtime column 记录的是支持集构造完成之后的 TabICL fit+predict 时间，不包含 BPR 的 preprocessing、class-center 计算和 distance ranking 等 support-set selection overhead。在这个模型侧计时定义下，Full Context 的 median 为 45.8005 秒，而预算受限策略大约在 2.5 到 4.8 秒范围内。因此，support-set compression 可以让 TabICL 模型执行快得多；但如果要声称完整 retrieval system 运行时间收益，还需要把支持集选择开销也计入。
+Runtime 结果仍然有价值，但必须明确它的定义。Fit+predict column 记录的是支持集构造完成之后的 TabICL 模型侧时间；selection 和 end-to-end columns 则包含当前脚本记录的 support-set construction step。在这个模型侧计时定义下，Full Context 的 median 为 28.7849 秒，而预算受限策略大约在 2.0 到 4.1 秒范围内。当前实现中，BPR 增加的 median selection overhead 约为 0.185 秒。因此，support-set compression 可以让 TabICL 执行快得多；但 BPR selection rule 仍然没有把效率收益转化为预测性能收益。
 
 正确结论不是 Big Plus “成功了”。更谨慎的结论是：support-set compression 具有实际价值，而 Balanced Random Subset 是一个很强的 baseline，未来任何 retrieval method 都必须先超过它。
 

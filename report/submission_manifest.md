@@ -60,6 +60,6 @@ The Phase 6 result should be presented as a negative ablation: budget-limited su
 ## Explicitly Not Done / Caveats
 
 - Phase 7 was not started.
-- The frozen Phase 6 method definition was not changed, but `src/phase6_big_plus_adult.py` now has a safer `--preset smoke|final` interface and records selection/end-to-end timing for new runs.
+- The frozen Phase 6 method definition was not changed, but `src/phase6_big_plus_adult.py` now has a safer `--preset smoke|final` interface and records selection/end-to-end timing in the committed Phase 6 artifacts.
 - The supplemental missingness check is a small sanity check, not a full robustness benchmark.
-- The Phase 6 summary table in the report uses model-side TabICL fit+predict runtime after support-set construction; it does not include support-selection overhead from the original Phase 6 result CSV.
+- `requirements-basic.txt` is the minimal install list, `requirements-lock.txt` records the key submitted package versions, and `requirements-freeze.txt` is the full transitive `.venv` snapshot.

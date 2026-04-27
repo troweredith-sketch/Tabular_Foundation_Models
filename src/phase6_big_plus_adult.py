@@ -381,7 +381,7 @@ def build_split_name(seed: int) -> str:
 
 def build_notes(strategy: str, budget_label: str, actual_support_size: int) -> str:
     base = (
-        "Phase 6 Big Plus smoke/mainline row for Adult + TabICL support-set selection; "
+        "Phase 6 Big Plus Adult TabICL support-set selection row; "
         f"strategy={STRATEGY_DISPLAY_NAMES[strategy]}."
     )
     if strategy == FULL_CONTEXT:
